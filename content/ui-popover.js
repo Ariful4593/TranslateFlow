@@ -68,6 +68,10 @@ window.UIPopover = (function () {
   let audioPlaySessionId = 0;
   const audioCache = new Map();
 
+  // Animation Timers
+  let cardHideTimer = null;
+  let triggerHideTimer = null;
+
   // Callbacks
   let onTriggerClick = null;
 
@@ -150,10 +154,24 @@ window.UIPopover = (function () {
           border: none;
           box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
           pointer-events: auto;
-          transition: transform 0.15s ease, background 0.15s ease;
           user-select: none;
           z-index: 2147483647;
-          animation: btFadeIn 0.15s ease-out;
+          opacity: 0;
+          transform: translateY(6px) scale(0.94);
+          transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                      background 0.15s ease;
+        }
+
+        .bt-trigger-btn.bt-visible {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+
+        .bt-trigger-btn.bt-hiding {
+          opacity: 0;
+          transform: translateY(5px) scale(0.94);
+          transition: opacity 0.14s ease-in, transform 0.14s ease-in;
         }
 
         .bt-trigger-btn:hover {
@@ -175,8 +193,8 @@ window.UIPopover = (function () {
           width: 460px;
           max-width: calc(100vw - 32px);
           background: var(--bt-bg);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
           border: 1px solid var(--bt-border);
           border-radius: 12px;
           box-shadow: var(--bt-shadow);
@@ -184,8 +202,26 @@ window.UIPopover = (function () {
           color: var(--bt-text);
           pointer-events: auto;
           z-index: 2147483647;
-          animation: btPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           overflow: hidden;
+          opacity: 0;
+          transform: translateY(12px) scale(0.97);
+          transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+                      box-shadow 0.2s ease;
+          will-change: transform, opacity;
+        }
+
+        .bt-card.bt-visible {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+
+        .bt-card.bt-hiding {
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(10px) scale(0.97);
+          transition: opacity 0.18s cubic-bezier(0.4, 0, 1, 1),
+                      transform 0.18s cubic-bezier(0.4, 0, 1, 1);
         }
 
         /* Card Header */
@@ -219,10 +255,10 @@ window.UIPopover = (function () {
 
         .bt-card.is-dragging {
           user-select: none !important;
-          opacity: 0.94;
+          opacity: 0.94 !important;
           box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25) !important;
           transition: none !important;
-          animation: none !important;
+          transform: none !important;
         }
 
         .bt-card.is-dragging .bt-header {
@@ -496,7 +532,7 @@ window.UIPopover = (function () {
     // Trigger button click
     triggerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      triggerBtn.style.display = 'none';
+      hideTrigger(true);
       if (typeof onTriggerClick === 'function') {
         onTriggerClick(originalSelectedText, activeSelectionRange);
       }
@@ -944,10 +980,18 @@ window.UIPopover = (function () {
   /**
    * Positions and displays the floating trigger button near selection.
    */
+  /**
+   * Positions and displays the floating trigger button near selection with slide transition.
+   */
   function showTrigger(selectionRange, text, userTargetLang = null) {
     init();
+    clearTimeout(triggerHideTimer);
+    clearTimeout(cardHideTimer);
+
     activeSelectionRange = selectionRange;
     originalSelectedText = text;
+
+    hideCard(true); // immediately hide any open card
 
     const activeTarget = userTargetLang || uiSettings.targetLanguage || 'bn';
     const isBengali = window.TermGuardian?.isBengaliText ? window.TermGuardian.isBengaliText(text) : /[\u0980-\u09FF]/.test(text);
@@ -966,8 +1010,6 @@ window.UIPopover = (function () {
     const rect = selectionRange.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return;
 
-    cardEl.style.display = 'none';
-
     // Position trigger near the end of selection
     const pageX = window.scrollX + rect.right;
     const pageY = window.scrollY + rect.bottom + 6;
@@ -975,14 +1017,42 @@ window.UIPopover = (function () {
     triggerBtn.style.top = `${pageY}px`;
     triggerBtn.style.left = `${Math.max(10, pageX - 60)}px`;
     triggerBtn.style.display = 'inline-flex';
+    triggerBtn.classList.remove('bt-hiding');
+    // Force layout reflow so the transition animates smoothly
+    void triggerBtn.offsetWidth;
+    triggerBtn.classList.add('bt-visible');
   }
 
   /**
-   * Shows the translation card and positions it near selection.
+   * Smoothly slides out and hides the floating trigger button.
+   */
+  function hideTrigger(immediate = false) {
+    if (!triggerBtn || triggerBtn.style.display === 'none') return;
+    clearTimeout(triggerHideTimer);
+
+    if (immediate) {
+      triggerBtn.classList.remove('bt-visible', 'bt-hiding');
+      triggerBtn.style.display = 'none';
+      return;
+    }
+
+    triggerBtn.classList.remove('bt-visible');
+    triggerBtn.classList.add('bt-hiding');
+    triggerHideTimer = setTimeout(() => {
+      triggerBtn.classList.remove('bt-hiding');
+      triggerBtn.style.display = 'none';
+    }, 140);
+  }
+
+  /**
+   * Shows the translation card and positions it near selection with smooth slide-in transition.
    */
   function showCard(selectionRange, text, userTargetLang = null) {
     init();
     stopAudio();
+    clearTimeout(cardHideTimer);
+    clearTimeout(triggerHideTimer);
+
     activeSelectionRange = selectionRange;
     originalSelectedText = text;
     isReplacedInPage = false;
@@ -1023,7 +1093,7 @@ window.UIPopover = (function () {
       replaceBtn.innerHTML = isNonBn ? '<span>⇄ Replace</span>' : '<span>⇄ প্রতিস্থাপন</span>';
     }
 
-    triggerBtn.style.display = 'none';
+    hideTrigger(true); // immediately hide trigger
 
     // Reset card contents to loading skeleton
     const contentBox = shadowRoot.getElementById('bt-content');
@@ -1037,6 +1107,32 @@ window.UIPopover = (function () {
 
     positionCard(selectionRange);
     cardEl.style.display = 'flex';
+    cardEl.classList.remove('bt-hiding');
+    // Force layout reflow so the transition animates smoothly from translateY(12px) to 0
+    void cardEl.offsetWidth;
+    cardEl.classList.add('bt-visible');
+  }
+
+  /**
+   * Smoothly slides out and hides the translation popover card.
+   */
+  function hideCard(immediate = false) {
+    if (!cardEl || cardEl.style.display === 'none') return;
+    stopAudio();
+    clearTimeout(cardHideTimer);
+
+    if (immediate) {
+      cardEl.classList.remove('bt-visible', 'bt-hiding');
+      cardEl.style.display = 'none';
+      return;
+    }
+
+    cardEl.classList.remove('bt-visible');
+    cardEl.classList.add('bt-hiding');
+    cardHideTimer = setTimeout(() => {
+      cardEl.classList.remove('bt-hiding');
+      cardEl.style.display = 'none';
+    }, 190);
   }
 
   /**
@@ -1234,20 +1330,18 @@ window.UIPopover = (function () {
   }
 
   /**
-   * Hides all UI elements.
+   * Hides all UI elements with smooth slide-out transition.
    */
-  function hideAll() {
-    stopAudio();
-    if (triggerBtn) triggerBtn.style.display = 'none';
-    if (cardEl) cardEl.style.display = 'none';
+  function hideAll(immediate = false) {
+    hideTrigger(immediate);
+    hideCard(immediate);
     activeSelectionRange = null;
   }
 
   function isVisible() {
-    return (
-      (triggerBtn && triggerBtn.style.display !== 'none') ||
-      (cardEl && cardEl.style.display !== 'none')
-    );
+    const isTriggerActive = triggerBtn && triggerBtn.style.display !== 'none' && !triggerBtn.classList.contains('bt-hiding');
+    const isCardActive = cardEl && cardEl.style.display !== 'none' && !cardEl.classList.contains('bt-hiding');
+    return isTriggerActive || isCardActive;
   }
 
   return {
