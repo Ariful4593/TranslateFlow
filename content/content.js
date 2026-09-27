@@ -118,6 +118,11 @@
     const host = document.getElementById('bangla-translator-host');
     if (host && host.contains(e.target)) return;
 
+    // Security & privacy: Never capture or translate selections from password inputs
+    if (e.target && (e.target.type === 'password' || e.target.matches?.('input[type="password"]'))) {
+      return;
+    }
+
     clearTimeout(selectionTimeout);
     selectionTimeout = setTimeout(() => {
       const selection = window.getSelection();

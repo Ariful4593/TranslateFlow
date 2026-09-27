@@ -109,11 +109,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           text.trim()
         )}&tl=${encodeURIComponent(lang)}&client=gtx`;
 
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-          }
-        });
+        const response = await fetch(url);
 
         if (!response.ok) {
           throw new Error(`TTS fetch failed with status ${response.status}`);

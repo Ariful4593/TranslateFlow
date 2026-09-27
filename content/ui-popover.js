@@ -78,7 +78,7 @@ window.UIPopover = (function () {
       'all: initial; position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 2147483647; pointer-events: none;';
     document.documentElement.appendChild(hostEl);
 
-    shadowRoot = hostEl.attachShadow({ mode: 'open' });
+    shadowRoot = hostEl.attachShadow({ mode: 'closed' });
 
     // Inject styles & template
     shadowRoot.innerHTML = `
