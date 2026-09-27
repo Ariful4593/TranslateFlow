@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bangla Inline Translator</title>
+  <title>TranslateFlow: AI Web & Inline Translator</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -13,8 +13,8 @@
       <div class="brand">
         <img src="../icons/icon-48.png" alt="Logo" class="brand-logo">
         <div class="brand-text">
-          <h1 class="brand-name">Bangla Translator</h1>
-          <span class="brand-tagline">Inline AI Translation</span>
+          <h1 class="brand-name">TranslateFlow</h1>
+          <span class="brand-tagline">Smart Inline AI Translator</span>
         </div>
       </div>
       <!-- Compact Engine Status Pill -->
@@ -59,7 +59,28 @@
 
     <!-- Unified Settings Card -->
     <div class="settings-card">
-      <!-- 1. Trigger Mode -->
+      <!-- 1. Target Language -->
+      <div class="settings-row">
+        <div class="row-label">
+          <strong>Target Language</strong>
+          <small>Primary translation language</small>
+        </div>
+        <select id="target-language" class="clean-select">
+          <option value="bn" selected>Bangla (বাংলা)</option>
+          <option value="es">Spanish (Español)</option>
+          <option value="hi">Hindi (हिन्दी)</option>
+          <option value="ar">Arabic (العربية)</option>
+          <option value="fr">French (Français)</option>
+          <option value="de">German (Deutsch)</option>
+          <option value="zh">Chinese (中文)</option>
+          <option value="ja">Japanese (日本語)</option>
+          <option value="pt">Portuguese (Português)</option>
+          <option value="ru">Russian (Русский)</option>
+          <option value="ur">Urdu (اردو)</option>
+        </select>
+      </div>
+
+      <!-- 2. Trigger Mode -->
       <div class="settings-row">
         <div class="row-label">
           <strong>Trigger Mode</strong>

@@ -1,8 +1,6 @@
-# Bangla Inline Translator (সহজবোধ্য বাংলা অনুবাদক) 🌐
+# TranslateFlow: AI Web & Inline Translator 🌐
 
-একটি আধুনিক Manifest V3 ক্রোম এক্সটেনশন, যা ওয়েবসাইটের যেকোনো প্যারাগ্রাফ বা টেক্সট সিলেক্ট করলেই তাৎক্ষণিকভাবে **সহজবোধ্য, প্রাকৃতিক বাংলায়** ইনলাইন অনুবাদ প্রদর্শন করে।
-
-বিশেষভাবে ডিজাইন করা হয়েছে **প্রোগ্রামিং ও টেকনিক্যাল ডকুমেন্টেশন** (যেমন: Next.js, React, MDN, GitHub) পড়ার সময় যাতে কোড ও টেকনিক্যাল টার্ম অক্ষত রেখে স্পষ্ট অনুবাদ পাওয়া যায়।
+A modern Manifest V3 Chrome Extension providing instant, inline AI translations directly on web pages with developer-friendly technical term preservation. Defaults to **Bangla (বাংলা)** while supporting **international languages** (Spanish, Hindi, French, German, Arabic, Japanese, Chinese, etc.).
 
 ---
 

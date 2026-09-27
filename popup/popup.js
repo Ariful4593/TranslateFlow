@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const domainBadge = document.getElementById('domain-status-badge');
 
   // Settings inputs
+  const targetLanguageSelect = document.getElementById('target-language');
   const triggerModeSelect = document.getElementById('trigger-mode');
   const preserveTermsCheckbox = document.getElementById('preserve-terms');
   const fontSizeSelect = document.getElementById('font-size');
@@ -125,6 +126,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const { settings } = await chrome.storage.sync.get('settings');
     if (settings) {
+      if (settings.targetLanguage && targetLanguageSelect) {
+        targetLanguageSelect.value = settings.targetLanguage;
+      }
       if (settings.triggerMode) triggerModeSelect.value = settings.triggerMode;
       if (typeof settings.preserveTechnicalTerms === 'boolean') {
         preserveTermsCheckbox.checked = settings.preserveTechnicalTerms;
@@ -155,6 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 4. Save settings on change
   async function saveSettings() {
     const updated = {
+      targetLanguage: targetLanguageSelect ? targetLanguageSelect.value : 'bn',
       triggerMode: triggerModeSelect.value,
       preserveTechnicalTerms: preserveTermsCheckbox.checked,
       fontSize: fontSizeSelect.value,
@@ -169,6 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  if (targetLanguageSelect) targetLanguageSelect.addEventListener('change', saveSettings);
   triggerModeSelect.addEventListener('change', saveSettings);
   preserveTermsCheckbox.addEventListener('change', saveSettings);
   fontSizeSelect.addEventListener('change', saveSettings);
@@ -217,10 +223,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         termsMap = protectedData.termsMap;
       }
 
-      const isBengali = window.TermGuardian?.isBengaliText
+      const selectedLang = targetLanguageSelect ? targetLanguageSelect.value : 'bn';
+      const isTargetLang = window.TermGuardian?.isBengaliText && selectedLang === 'bn'
         ? window.TermGuardian.isBengaliText(text)
-        : /[\u0980-\u09FF]/.test(text);
-      const targetLang = isBengali ? 'en' : 'bn';
+        : false;
+      const targetLang = isTargetLang ? 'en' : selectedLang;
 
       chrome.runtime.sendMessage(
         {

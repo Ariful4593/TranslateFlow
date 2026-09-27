@@ -5,6 +5,7 @@
 
 (function () {
   let userSettings = {
+    targetLanguage: 'bn',
     triggerMode: 'button', // 'button' | 'instant'
     preserveTechnicalTerms: true,
     fontSize: 'medium',
@@ -76,10 +77,12 @@
     if (!text || !text.trim()) return;
 
     const currentSessionId = ++activeTranslationSessionId;
-    window.UIPopover.showCard(range, text);
+    const targetLang = userSettings.targetLanguage || 'bn';
+    window.UIPopover.showCard(range, text, targetLang);
 
     try {
       const result = await window.TranslatorEngine.translate(text, {
+        targetLang: targetLang,
         preserveTechnicalTerms: userSettings.preserveTechnicalTerms,
         onStreamChunk: (chunkText, isFinal) => {
           if (currentSessionId !== activeTranslationSessionId) return;
@@ -147,7 +150,7 @@
         if (userSettings.triggerMode === 'instant') {
           executeTranslation(selectedText, range);
         } else {
-          window.UIPopover.showTrigger(range, selectedText);
+          window.UIPopover.showTrigger(range, selectedText, userSettings.targetLanguage || 'bn');
         }
       } catch (err) {
         console.warn('Could not read selection range:', err);

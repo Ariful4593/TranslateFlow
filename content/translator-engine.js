@@ -147,13 +147,15 @@ window.TranslatorEngine = (function () {
 
     const normalized = rawText.replace(/\r\n/g, '\n').trim();
 
-    // Auto-detect whether selected text is Bengali
+    // Auto-detect if selected text is already in the target language (default: Bengali)
+    const preferredTarget = options.targetLang || 'bn';
     const isBengali = window.TermGuardian && typeof window.TermGuardian.isBengaliText === 'function'
       ? window.TermGuardian.isBengaliText(normalized)
       : /[\u0980-\u09FF]/.test(normalized);
 
-    const sourceLang = options.sourceLang || (isBengali ? 'bn' : 'en');
-    const targetLang = options.targetLang || (isBengali ? 'en' : 'bn');
+    const isSourceTargetMatch = (preferredTarget === 'bn' && isBengali);
+    const sourceLang = options.sourceLang || (isSourceTargetMatch ? preferredTarget : (isBengali ? 'bn' : 'en'));
+    const targetLang = isSourceTargetMatch ? 'en' : preferredTarget;
 
     // Check if multiple paragraphs are selected (separated by blank lines, protected from recursive loops)
     if (!options._isSubChunk && /\n\s*\n/.test(normalized)) {

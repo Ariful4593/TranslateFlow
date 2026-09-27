@@ -18,8 +18,24 @@ window.UIPopover = (function () {
   let replacedOriginalNode = null;
   let replacedNewNode = null;
 
+  const LANGUAGE_NAMES = {
+    bn: 'বাংলা',
+    en: 'English',
+    es: 'Español',
+    hi: 'हिन्दी',
+    ar: 'العربية',
+    fr: 'Français',
+    de: 'Deutsch',
+    zh: '中文',
+    ja: '日本語',
+    pt: 'Português',
+    ru: 'Русский',
+    ur: 'اردو'
+  };
+
   // Settings & Preferences
   let uiSettings = {
+    targetLanguage: 'bn',
     enableTts: false,
     fontSize: 'medium'
   };
@@ -928,20 +944,24 @@ window.UIPopover = (function () {
   /**
    * Positions and displays the floating trigger button near selection.
    */
-  function showTrigger(selectionRange, text) {
+  function showTrigger(selectionRange, text, userTargetLang = null) {
     init();
     activeSelectionRange = selectionRange;
     originalSelectedText = text;
 
+    const activeTarget = userTargetLang || uiSettings.targetLanguage || 'bn';
     const isBengali = window.TermGuardian?.isBengaliText ? window.TermGuardian.isBengaliText(text) : /[\u0980-\u09FF]/.test(text);
-    currentSourceLang = isBengali ? 'bn' : 'en';
-    currentTargetLang = isBengali ? 'en' : 'bn';
+    const isTargetMatch = (activeTarget === 'bn' && isBengali);
 
+    currentSourceLang = isTargetMatch ? activeTarget : (isBengali ? 'bn' : 'en');
+    currentTargetLang = isTargetMatch ? 'en' : activeTarget;
+
+    const targetLabel = LANGUAGE_NAMES[currentTargetLang] || currentTargetLang.toUpperCase();
     const triggerText = shadowRoot.getElementById('bt-trigger-text');
     if (triggerText) {
-      triggerText.textContent = isBengali ? 'English' : 'বাংলা';
+      triggerText.textContent = targetLabel;
     }
-    triggerBtn.title = isBengali ? 'ইংরেজিতে অনুবাদ দেখুন (Translate to English)' : 'বাংলায় অনুবাদ দেখুন (Translate to Bangla)';
+    triggerBtn.title = `Translate to ${targetLabel}`;
 
     const rect = selectionRange.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return;
@@ -960,40 +980,47 @@ window.UIPopover = (function () {
   /**
    * Shows the translation card and positions it near selection.
    */
-  function showCard(selectionRange, text) {
+  function showCard(selectionRange, text, userTargetLang = null) {
     init();
     stopAudio();
     activeSelectionRange = selectionRange;
     originalSelectedText = text;
     isReplacedInPage = false;
 
+    const activeTarget = userTargetLang || uiSettings.targetLanguage || 'bn';
     const isBengali = window.TermGuardian?.isBengaliText ? window.TermGuardian.isBengaliText(text) : /[\u0980-\u09FF]/.test(text);
-    currentSourceLang = isBengali ? 'bn' : 'en';
-    currentTargetLang = isBengali ? 'en' : 'bn';
+    const isTargetMatch = (activeTarget === 'bn' && isBengali);
+
+    currentSourceLang = isTargetMatch ? activeTarget : (isBengali ? 'bn' : 'en');
+    currentTargetLang = isTargetMatch ? 'en' : activeTarget;
+
+    const sourceLabel = LANGUAGE_NAMES[currentSourceLang] || currentSourceLang.toUpperCase();
+    const targetLabel = LANGUAGE_NAMES[currentTargetLang] || currentTargetLang.toUpperCase();
 
     const dirEl = shadowRoot.getElementById('bt-lang-direction');
     if (dirEl) {
-      dirEl.textContent = isBengali ? 'বাংলা ➔ English' : 'English ➔ বাংলা';
+      dirEl.textContent = `${sourceLabel} ➔ ${targetLabel}`;
     }
 
+    const isNonBn = currentTargetLang !== 'bn';
     const copyBtn = shadowRoot.getElementById('bt-copy');
     if (copyBtn) {
       const copySpan = copyBtn.querySelector('span');
-      if (copySpan) copySpan.textContent = isBengali ? 'Copy' : 'কপি';
-      copyBtn.title = isBengali ? 'Copy translation' : 'অনুবাদ কপি করুন';
+      if (copySpan) copySpan.textContent = isNonBn ? 'Copy' : 'কপি';
+      copyBtn.title = isNonBn ? 'Copy translation' : 'অনুবাদ কপি করুন';
     }
 
     const speakBtn = shadowRoot.getElementById('bt-speak');
     if (speakBtn) {
       speakBtn.style.display = uiSettings.enableTts ? 'inline-flex' : 'none';
       const speakSpan = speakBtn.querySelector('span');
-      if (speakSpan) speakSpan.textContent = isBengali ? 'Listen' : 'শুনুন';
-      speakBtn.title = isBengali ? 'Listen to translation' : 'অনুবাদ শুনুন';
+      if (speakSpan) speakSpan.textContent = isNonBn ? 'Listen' : 'শুনুন';
+      speakBtn.title = isNonBn ? 'Listen to translation' : 'অনুবাদ শুনুন';
     }
 
     const replaceBtn = shadowRoot.getElementById('bt-replace');
     if (replaceBtn) {
-      replaceBtn.innerHTML = isBengali ? '<span>⇄ Replace</span>' : '<span>⇄ প্রতিস্থাপন</span>';
+      replaceBtn.innerHTML = isNonBn ? '<span>⇄ Replace</span>' : '<span>⇄ প্রতিস্থাপন</span>';
     }
 
     triggerBtn.style.display = 'none';

@@ -12,6 +12,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Initialize and migrate user settings safely
   const defaults = {
+    targetLanguage: 'bn', // Default target: Bangla (বাংলা), can be switched internationally
     triggerMode: 'button', // 'button' or 'instant'
     preserveTechnicalTerms: true,
     fontSize: 'medium', // 'small', 'medium', 'large'
