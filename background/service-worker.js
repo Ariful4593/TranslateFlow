@@ -10,20 +10,27 @@ chrome.runtime.onInstalled.addListener(async () => {
     contexts: ['selection']
   });
 
-  // Default settings
-  const currentSettings = await chrome.storage.sync.get('settings');
-  if (!currentSettings || !currentSettings.settings) {
-    await chrome.storage.sync.set({
-      settings: {
-        triggerMode: 'button', // 'button' or 'instant'
-        preserveTechnicalTerms: true,
-        fontSize: 'medium', // 'small', 'medium', 'large'
-        preferNativeAI: true,
-        autoDetectLang: true,
-        enableTts: false, // Initially hidden; shown when user enables it in settings
-        disabledDomains: [] // List of hostnames where translation is disabled
-      }
-    });
+  // Initialize and migrate user settings safely
+  const defaults = {
+    triggerMode: 'button', // 'button' or 'instant'
+    preserveTechnicalTerms: true,
+    fontSize: 'medium', // 'small', 'medium', 'large'
+    preferNativeAI: true,
+    autoDetectLang: true,
+    enableTts: false, // Initially hidden; shown when user enables it in settings
+    disabledDomains: [] // List of hostnames where translation is disabled
+  };
+
+  try {
+    const current = await chrome.storage.sync.get('settings');
+    const existing = current?.settings || {};
+    const merged = { ...defaults, ...existing };
+    if (!Array.isArray(merged.disabledDomains)) {
+      merged.disabledDomains = [];
+    }
+    await chrome.storage.sync.set({ settings: merged });
+  } catch (err) {
+    console.warn('Failed to initialize or migrate settings:', err);
   }
 });
 

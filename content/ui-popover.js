@@ -776,6 +776,10 @@ window.UIPopover = (function () {
     });
 
     if (response && response.success && response.audioData) {
+      if (audioCache.size >= 50) {
+        const oldestKey = audioCache.keys().next().value;
+        audioCache.delete(oldestKey);
+      }
       audioCache.set(cacheKey, response.audioData);
       return response.audioData;
     }
