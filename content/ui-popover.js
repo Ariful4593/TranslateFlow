@@ -529,6 +529,20 @@ window.UIPopover = (function () {
     initDraggable();
     applySettingsToUI();
 
+    // Warm up speech synthesis voices early for instant human-like speech
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.getVoices();
+        if (typeof window.speechSynthesis.addEventListener === 'function') {
+          window.speechSynthesis.addEventListener('voiceschanged', () => {
+            try {
+              window.speechSynthesis.getVoices();
+            } catch (e) {}
+          });
+        }
+      } catch (e) {}
+    }
+
     // Trigger button click
     triggerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -663,87 +677,113 @@ window.UIPopover = (function () {
   }
 
   /**
-   * Prepares text for speech:
-   * Replaces English abbreviations and technical terms with natural Bengali phonemes
-   * so the neural voice speaks them naturally like an experienced bilingual speaker.
+   * Prepares text for natural human-like speech:
+   * Smooths markdown symbols, acronyms, and technical jargon into natural phonetics.
    */
   function prepareTextForSpeech(text, lang = 'bn') {
     if (!text) return '';
-    if (lang === 'en') {
-      return text
-        .replace(/[`*#_~<>[\]()]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+
+    let clean = text
+      // Remove protocol from URLs so TTS doesn't spell "h-t-t-p-s colon slash slash"
+      .replace(/https?:\/\/(www\.)?/gi, '')
+      // Clean code fences, markdown asterisks, backticks, brackets
+      .replace(/[`*#_~<>[\]]/g, ' ')
+      .replace(/[—–]/g, ', ')
+      .replace(/[:;]/g, ', ')
+      .replace(/[()]/g, ', ')
+      .replace(/\s*\/\s*/g, lang === 'bn' ? ' বা ' : ' or ');
+
+    if (lang === 'bn') {
+      clean = clean
+        // Frameworks & tech brands (avoid dots like Next.js causing long robotic pauses)
+        .replace(/Next\.js/gi, 'নেক্সট জেএস')
+        .replace(/Node\.js/gi, 'নোড জেএস')
+        .replace(/Vue\.js/gi, 'ভিউ জেএস')
+        .replace(/React/gi, 'রিঅ্যাক্ট')
+        .replace(/JavaScript/gi, 'জাভাস্ক্রিপ্ট')
+        .replace(/TypeScript/gi, 'টাইপস্ক্রিপ্ট')
+        .replace(/full-stack web applications/gi, 'ফুল স্ট্যাক ওয়েব অ্যাপ্লিকেশন')
+        .replace(/full-stack/gi, 'ফুল স্ট্যাক')
+        .replace(/web applications/gi, 'ওয়েব অ্যাপ্লিকেশন')
+        .replace(/React [cC]omponents/gi, 'রিঅ্যাক্ট কম্পোনেন্টস')
+        .replace(/optimizations/gi, 'অপ্টিমাইজেশন')
+        .replace(/optimization/gi, 'অপ্টিমাইজেশন')
+        .replace(/user interfaces/gi, 'ইউজার ইন্টারফেস')
+        .replace(/user interface/gi, 'ইউজার ইন্টারফেস')
+        .replace(/lower-level tools/gi, 'লো-লেভেল টুলস')
+        .replace(/low-level tools/gi, 'লো-লেভেল টুলস')
+        .replace(/bundlers and compilers/gi, 'বান্ডলার এবং কম্পাইলার')
+        .replace(/bundlers/gi, 'বান্ডলারস')
+        .replace(/bundler/gi, 'বান্ডলার')
+        .replace(/compilers/gi, 'কম্পাইলারস')
+        .replace(/compiler/gi, 'কম্পাইলার')
+        .replace(/individual developer/gi, 'একক ডেভেলপার')
+        .replace(/developer/gi, 'ডেভেলপার')
+        .replace(/developers/gi, 'ডেভেলপাররা')
+        .replace(/applications/gi, 'অ্যাপ্লিকেশন')
+        .replace(/application/gi, 'অ্যাপ্লিকেশন')
+        .replace(/components/gi, 'কম্পোনেন্টস')
+        .replace(/component/gi, 'কম্পোনেন্ট')
+        .replace(/tools/gi, 'টুলস')
+        .replace(/tool/gi, 'টুল')
+        .replace(/frontend/gi, 'ফ্রন্টএন্ড')
+        .replace(/backend/gi, 'ব্যাকএন্ড')
+        .replace(/API/g, 'এপিআই')
+        .replace(/SDK/g, 'এসডিকে')
+        .replace(/CLI/g, 'সিএলআই')
+        .replace(/HTML/g, 'এইচটিএমএল')
+        .replace(/CSS/g, 'সিএসএস')
+        .replace(/DOM/g, 'ডম')
+        .replace(/JSON/g, 'জেসন')
+        .replace(/URL/g, 'ইউআরএল')
+        .replace(/CDN/g, 'সিডিএন')
+        .replace(/UI/g, 'ইউআই')
+        .replace(/server-side/gi, 'সার্ভার সাইড')
+        .replace(/client-side/gi, 'ক্লায়েন্ট সাইড')
+        .replace(/streaming/gi, 'স্ট্রিমিং')
+        .replace(/Suspense/gi, 'সাসপেন্স')
+        .replace(/chunked/gi, 'চাঙ্কড')
+        .replace(/chunks/gi, 'চাঙ্কস')
+        .replace(/chunk/gi, 'চাঙ্ক')
+        .replace(/shipping quickly/gi, 'দ্রুত শিপিং')
+        .replace(/shipping/gi, 'শিপিং')
+        .replace(/ship/gi, 'শিপ')
+        .replace(/build/gi, 'বিল্ড')
+        .replace(/code/gi, 'কোড')
+        .replace(/framework/gi, 'ফ্রেমওয়ার্ক')
+        // Error handling and technical documentation phrasing
+        .replace(/error handling/gi, 'এরর হ্যান্ডলিং')
+        .replace(/handling/gi, 'হ্যান্ডলিং')
+        .replace(/handle/gi, 'হ্যান্ডেল')
+        .replace(/uncaught exceptions/gi, 'আনকট এক্সেপশনস')
+        .replace(/uncaught exception/gi, 'আনকট এক্সেপশন')
+        .replace(/uncaught/gi, 'আনকট')
+        .replace(/expected errors/gi, 'প্রত্যাশিত এরর')
+        .replace(/expected error/gi, 'প্রত্যাশিত এরর')
+        .replace(/expected/gi, 'প্রত্যাশিত')
+        .replace(/exceptions/gi, 'এক্সেপশনস')
+        .replace(/exception/gi, 'এক্সেপশন')
+        .replace(/errors/gi, 'এররস')
+        .replace(/error/gi, 'এরর')
+        .replace(/categories/gi, 'ক্যাটাগরি')
+        .replace(/category/gi, 'ক্যাটাগরি')
+        .replace(/walk you through/gi, 'ধাপে ধাপে দেখিয়ে দেবে')
+        .replace(/walk through/gi, 'সহজভাবে বুঝিয়ে দেওয়া')
+        .replace(/\s*\/\s*/g, ' বা ');
     }
 
-    return text
-      // Frameworks & tech brands (avoid dots like Next.js causing long robotic pauses)
-      .replace(/Next\.js/gi, 'নেক্সট জেএস')
-      .replace(/Node\.js/gi, 'নোড জেএস')
-      .replace(/Vue\.js/gi, 'ভিউ জেএস')
-      .replace(/React/gi, 'রিঅ্যাক্ট')
-      .replace(/full-stack web applications/gi, 'ফুল স্ট্যাক ওয়েব অ্যাপ্লিকেশন')
-      .replace(/full-stack/gi, 'ফুল স্ট্যাক')
-      .replace(/web applications/gi, 'ওয়েব অ্যাপ্লিকেশন')
-      .replace(/React [cC]omponents/gi, 'রিঅ্যাক্ট কম্পোনেন্টস')
-      .replace(/optimizations/gi, 'অপ্টিমাইজেশন')
-      .replace(/optimization/gi, 'অপ্টিমাইজেশন')
-      .replace(/user interfaces/gi, 'ইউজার ইন্টারফেস')
-      .replace(/user interface/gi, 'ইউজার ইন্টারফেস')
-      .replace(/lower-level tools/gi, 'লো-লেভেল টুলস')
-      .replace(/low-level tools/gi, 'লো-লেভেল টুলস')
-      .replace(/bundlers and compilers/gi, 'বান্ডলার এবং কম্পাইলার')
-      .replace(/bundlers/gi, 'বান্ডলারস')
-      .replace(/bundler/gi, 'বান্ডলার')
-      .replace(/compilers/gi, 'কম্পাইলারস')
-      .replace(/compiler/gi, 'কম্পাইলার')
-      .replace(/individual developer/gi, 'একক ডেভেলপার')
-      .replace(/developer/gi, 'ডেভেলপার')
-      .replace(/developers/gi, 'ডেভেলপাররা')
-      .replace(/applications/gi, 'অ্যাপ্লিকেশন')
-      .replace(/application/gi, 'অ্যাপ্লিকেশন')
-      .replace(/components/gi, 'কম্পোনেন্টস')
-      .replace(/component/gi, 'কম্পোনেন্ট')
-      .replace(/tools/gi, 'টুলস')
-      .replace(/tool/gi, 'টুল')
-      .replace(/frontend/gi, 'ফ্রন্টএন্ড')
-      .replace(/backend/gi, 'ব্যাকএন্ড')
-      .replace(/API/g, 'এপিআই')
-      .replace(/SDK/g, 'এসডিকে')
-      .replace(/CLI/g, 'সিএলআই')
-      .replace(/HTML/g, 'এইচটিএমএল')
-      .replace(/CSS/g, 'সিএসএস')
-      .replace(/DOM/g, 'ডম')
-      .replace(/JSON/g, 'জেসন')
-      .replace(/URL/g, 'ইউআরএল')
-      .replace(/CDN/g, 'সিডিএন')
-      .replace(/UI/g, 'ইউআই')
-      .replace(/server-side/gi, 'সার্ভার সাইড')
-      .replace(/client-side/gi, 'ক্লায়েন্ট সাইড')
-      .replace(/streaming/gi, 'স্ট্রিমিং')
-      .replace(/Suspense/gi, 'সাসপেন্স')
-      .replace(/chunked/gi, 'চাঙ্কড')
-      .replace(/chunks/gi, 'চাঙ্কস')
-      .replace(/chunk/gi, 'চাঙ্ক')
-      .replace(/shipping quickly/gi, 'দ্রুত শিপিং')
-      .replace(/shipping/gi, 'শিপিং')
-      .replace(/ship/gi, 'শিপ')
-      .replace(/build/gi, 'বিল্ড')
-      .replace(/code/gi, 'কোড')
-      .replace(/framework/gi, 'ফ্রেমওয়ার্ক')
-      // Remove symbols that sound robotic or confuse TTS
-      .replace(/[`*#_~<>[\]]/g, ' ')
-      .replace(/[()]/g, ', ')
-      .replace(/\s*\/\s*/g, ' বা ')
+    // Natural speech punctuation spacing (ensures pauses between sentences and clauses)
+    return clean
+      .replace(/([।,!?])([^\s])/g, '$1 $2')
       .replace(/\s+/g, ' ')
       .trim();
   }
 
   /**
-   * Splits text into smaller sentence- and clause-sized chunks (<160 chars)
-   * so Google Neural TTS never exceeds its 200-char limit and speaks smoothly.
+   * Splits text into smaller sentence- and clause-sized chunks (<140 chars)
+   * for smooth, natural human breathing cadence and zero audio clipping.
    */
-  function splitIntoAudioChunks(text, maxLen = 160) {
+  function splitIntoAudioChunks(text, maxLen = 140) {
     if (!text) return [];
     const rawSentences = text.split(/(?<=[।?!\n])/g).map((s) => s.trim()).filter(Boolean);
     const chunks = [];
@@ -768,6 +808,41 @@ window.UIPopover = (function () {
       }
     }
     return chunks.filter((c) => c.length > 0);
+  }
+
+  /**
+   * Finds the most natural, human-sounding voice available in the browser.
+   * Prioritizes Neural / Online / Natural voices (e.g. Microsoft Natural, Google WaveNet).
+   */
+  function findNaturalVoice(lang = 'bn') {
+    if (!('speechSynthesis' in window)) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+
+    const prefix = (lang || 'bn').toLowerCase().split('-')[0];
+
+    // Priority 1: High-definition Neural / Online / Natural voices
+    const naturalVoice = voices.find((v) => {
+      const vLang = (v.lang || '').toLowerCase().replace('_', '-');
+      return vLang.startsWith(prefix) && /natural|online|neural|wavenet/i.test(v.name);
+    });
+    if (naturalVoice) return naturalVoice;
+
+    // Priority 2: Google modern neural browser voice
+    const googleVoice = voices.find((v) => {
+      const vLang = (v.lang || '').toLowerCase().replace('_', '-');
+      return vLang.startsWith(prefix) && /google/i.test(v.name);
+    });
+    if (googleVoice) return googleVoice;
+
+    // Priority 3: Any installed system/browser voice matching target language
+    const langVoice = voices.find((v) => {
+      const vLang = (v.lang || '').toLowerCase().replace('_', '-');
+      return vLang.startsWith(prefix);
+    });
+    if (langVoice) return langVoice;
+
+    return null;
   }
 
   /**
@@ -813,7 +888,7 @@ window.UIPopover = (function () {
     }
 
     const response = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('TTS timeout')), 5000);
+      const timeout = setTimeout(() => reject(new Error('TTS timeout')), 6000);
       chrome.runtime.sendMessage(
         { action: 'GET_TTS_AUDIO', text: chunk, lang: lang },
         (res) => {
@@ -839,7 +914,9 @@ window.UIPopover = (function () {
   }
 
   /**
-   * High-fidelity Natural Voice Player (Google Studio Neural Audio with seamless prefetching).
+   * High-fidelity Natural Human Voice Player.
+   * Prioritizes browser neural / online voices for natural cadence and human intonation.
+   * Falls back smoothly to clean audio streaming with zero metallic distortion.
    */
   async function playNaturalTTS(rawText, lang = 'bn') {
     if (!rawText || !rawText.trim()) return;
@@ -868,11 +945,77 @@ window.UIPopover = (function () {
 
     showToast(isEn ? 'Playing...' : 'পড়া হচ্ছে...');
 
-    // Prepare speech-optimized text
+    // Prepare speech-optimized natural phonetics
     const cleanSpeechText = prepareTextForSpeech(rawText, lang);
-    const chunks = splitIntoAudioChunks(cleanSpeechText, 160);
+    const chunks = splitIntoAudioChunks(cleanSpeechText, 140);
+    if (!chunks.length) {
+      stopAudio();
+      return;
+    }
 
-    async function playQueue(index) {
+    // Check if natural browser voice is available (wait briefly if voices loading)
+    let naturalVoice = findNaturalVoice(lang);
+    if (!naturalVoice && 'speechSynthesis' in window && window.speechSynthesis.getVoices().length === 0) {
+      await new Promise((resolve) => {
+        let timer;
+        const onVoices = () => {
+          clearTimeout(timer);
+          if (window.speechSynthesis.removeEventListener) {
+            window.speechSynthesis.removeEventListener('voiceschanged', onVoices);
+          }
+          resolve();
+        };
+        timer = setTimeout(onVoices, 250);
+        if (window.speechSynthesis.addEventListener) {
+          window.speechSynthesis.addEventListener('voiceschanged', onVoices, { once: true });
+        }
+      });
+      naturalVoice = findNaturalVoice(lang);
+    }
+
+    if (thisSessionId !== audioPlaySessionId || !isAudioPlaying) return;
+
+    // Strategy 1: Browser Neural / Natural Voice (sounds completely human and expressive)
+    if (naturalVoice) {
+      let chunkIdx = 0;
+
+      function speakNextChunk() {
+        if (thisSessionId !== audioPlaySessionId || !isAudioPlaying) return;
+        if (chunkIdx >= chunks.length) {
+          stopAudio();
+          return;
+        }
+
+        const chunk = chunks[chunkIdx++];
+        const utterance = new SpeechSynthesisUtterance(chunk);
+        utterance.voice = naturalVoice;
+        utterance.lang = naturalVoice.lang || (lang === 'en' ? 'en-US' : 'bn-BD');
+        utterance.rate = 0.95; // Conversational human pace
+        utterance.pitch = 1.0; // Natural pitch
+
+        utterance.onend = () => {
+          if (thisSessionId === audioPlaySessionId && isAudioPlaying) {
+            // Conversational 50ms pause between clauses
+            setTimeout(speakNextChunk, 50);
+          }
+        };
+
+        utterance.onerror = (e) => {
+          console.warn('SpeechSynthesis chunk error, continuing:', e);
+          if (thisSessionId === audioPlaySessionId && isAudioPlaying) {
+            speakNextChunk();
+          }
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+
+      speakNextChunk();
+      return;
+    }
+
+    // Strategy 2: Clean audio stream fallback (clean 1.0 playback rate without metallic artifacts)
+    async function playAudioQueue(index) {
       if (thisSessionId !== audioPlaySessionId || !isAudioPlaying) return;
 
       if (index >= chunks.length) {
@@ -887,33 +1030,33 @@ window.UIPopover = (function () {
         if (thisSessionId !== audioPlaySessionId || !isAudioPlaying) return;
 
         currentAudio = new Audio(audioData);
-        currentAudio.playbackRate = 0.95; // relaxed, natural human speech rate
+        currentAudio.playbackRate = 1.0; // Clean 1.0 playback rate avoids robotic metallic time-stretching
         currentAudio.onended = () => {
-          playQueue(index + 1);
+          playAudioQueue(index + 1);
         };
         currentAudio.onerror = (e) => {
-          console.warn('Audio playback error, falling back to synthesis:', e);
-          fallbackToSpeechSynthesis(chunk, lang, () => playQueue(index + 1), thisSessionId);
+          console.warn('Audio playback error, falling back:', e);
+          fallbackToSpeechSynthesis(chunk, lang, () => playAudioQueue(index + 1), thisSessionId);
         };
 
         await currentAudio.play();
 
-        // Pre-fetch the next chunk while the current one is playing for zero-lag transitions
+        // Gapless pre-fetch next chunk
         if (index + 1 < chunks.length) {
           fetchChunkAudio(chunks[index + 1], lang).catch(() => {});
         }
       } catch (err) {
-        console.warn('Neural TTS failed, falling back to speech synthesis:', err.message);
+        console.warn('Audio chunk fetch failed, falling back:', err.message);
         if (thisSessionId !== audioPlaySessionId || !isAudioPlaying) return;
-        fallbackToSpeechSynthesis(chunk, lang, () => playQueue(index + 1), thisSessionId);
+        fallbackToSpeechSynthesis(chunk, lang, () => playAudioQueue(index + 1), thisSessionId);
       }
     }
 
-    playQueue(0);
+    playAudioQueue(0);
   }
 
   /**
-   * Fallback using browser speechSynthesis with natural voice selection.
+   * Fallback speech synthesis helper for individual chunks.
    */
   function fallbackToSpeechSynthesis(text, lang, onComplete, sessionId) {
     if (!('speechSynthesis' in window)) {
@@ -924,32 +1067,12 @@ window.UIPopover = (function () {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang === 'en' ? 'en-US' : 'bn-BD';
-    utterance.rate = 0.92;
+    utterance.rate = 0.95;
     utterance.pitch = 1.0;
 
-    const voices = window.speechSynthesis.getVoices();
-    if (lang === 'en') {
-      const enVoice = voices.find(
-        (v) =>
-          v.lang.startsWith('en') &&
-          (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Online'))
-      );
-      if (enVoice) utterance.voice = enVoice;
-      else {
-        const anyEn = voices.find((v) => v.lang.startsWith('en'));
-        if (anyEn) utterance.voice = anyEn;
-      }
-    } else {
-      const bnVoice = voices.find(
-        (v) =>
-          v.lang.startsWith('bn') &&
-          (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Online'))
-      );
-      if (bnVoice) utterance.voice = bnVoice;
-      else {
-        const anyBn = voices.find((v) => v.lang.startsWith('bn'));
-        if (anyBn) utterance.voice = anyBn;
-      }
+    const voice = findNaturalVoice(lang);
+    if (voice) {
+      utterance.voice = voice;
     }
 
     utterance.onend = () => {

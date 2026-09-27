@@ -106,9 +106,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           return;
         }
 
-        const url = `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
           text.trim()
-        )}&tl=${encodeURIComponent(lang)}&client=gtx`;
+        )}&tl=${encodeURIComponent(lang)}&client=tw-ob`;
 
         const response = await fetch(url);
 
