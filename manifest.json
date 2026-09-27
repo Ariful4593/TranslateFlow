@@ -23,7 +23,8 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://translate.googleapis.com/*"
+    "https://translate.googleapis.com/*",
+    "https://translate.google.com/*"
   ],
   "background": {
     "service_worker": "background/service-worker.js"
