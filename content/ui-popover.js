@@ -326,19 +326,19 @@ window.UIPopover = (function () {
 
         /* Content Area */
         .bt-body {
-          padding: 14px 16px;
+          padding: 12px 14px;
           max-height: 360px;
           overflow-y: auto;
-          font-size: 14px;
-          line-height: 1.7;
-          letter-spacing: 0.15px;
+          font-size: 13.5px;
+          line-height: 1.65;
+          letter-spacing: 0.1px;
           word-break: break-word;
-          white-space: pre-line;
+          white-space: normal;
         }
 
         .bt-para {
-          margin-bottom: 12px;
-          line-height: 1.7;
+          margin-bottom: 10px;
+          line-height: 1.65;
           white-space: pre-line;
         }
 
@@ -469,14 +469,18 @@ window.UIPopover = (function () {
 
         /* Summary view styling */
         .bt-summary-container {
-          animation: btFadeIn 0.25s ease;
+          animation: btFadeIn 0.2s ease;
+          white-space: normal !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
         .bt-summary-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 10px;
+          margin: 0 0 8px 0;
+          padding: 0;
         }
 
         .bt-summary-badge {
@@ -487,40 +491,46 @@ window.UIPopover = (function () {
           font-weight: 600;
           color: #2563eb;
           background: rgba(37, 99, 235, 0.08);
-          padding: 3px 8px;
-          border-radius: 6px;
+          padding: 2px 8px;
+          border-radius: 5px;
+          line-height: 1.4;
         }
 
         .bt-summary-engine {
-          font-size: 10.5px;
+          font-size: 10px;
           color: var(--bt-text-muted);
           background: rgba(0, 0, 0, 0.04);
           padding: 2px 6px;
           border-radius: 4px;
+          line-height: 1.3;
         }
 
         .bt-summary-list {
-          margin: 0;
-          padding-left: 18px;
-          list-style-type: disc;
+          margin: 0 !important;
+          padding: 0 0 0 16px !important;
+          list-style-type: disc !important;
         }
 
         .bt-summary-item {
-          margin-bottom: 8px;
-          line-height: 1.6;
+          margin: 0 0 6px 0 !important;
+          padding: 0 !important;
+          line-height: 1.55 !important;
+          font-size: 13.5px;
+          white-space: normal !important;
         }
 
         .bt-summary-item:last-child {
-          margin-bottom: 0;
+          margin-bottom: 0 !important;
         }
 
         .bt-summary-loading {
           display: flex;
           align-items: center;
           gap: 8px;
-          font-size: 12.5px;
+          font-size: 12px;
           color: var(--bt-text-muted);
-          padding: 8px 0;
+          padding: 4px 0;
+          margin: 0;
         }
 
         @keyframes btShimmer {
@@ -1644,17 +1654,8 @@ window.UIPopover = (function () {
           : [currentTranslatedText];
 
         const badgeLabel = isEn ? '💡 Key Takeaways' : '💡 সহজ ভাষায় সারসংক্ষেপ';
-        const html = `
-          <div class="bt-summary-container">
-            <div class="bt-summary-header">
-              <span class="bt-summary-badge">${badgeLabel}</span>
-              <span class="bt-summary-engine">Smart Summary</span>
-            </div>
-            <ul class="bt-summary-list">
-              ${fallbackPoints.map(p => `<li class="bt-summary-item">${p}</li>`).join('')}
-            </ul>
-          </div>
-        `;
+        const items = fallbackPoints.map((p) => `<li class="bt-summary-item">${p}</li>`).join('');
+        const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">Smart Summary</span></div><ul class="bt-summary-list">${items}</ul></div>`.trim();
         currentSummaryData = {
           points: fallbackPoints,
           html: html,

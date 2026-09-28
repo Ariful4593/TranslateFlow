@@ -40,7 +40,18 @@ window.TermGuardian = (function () {
 
     'props', 'state', 'hook', 'hooks', 'lifecycle', 'component', 'components',
     'cache', 'caching', 'payload', 'fallback', 'endpoint', 'server action',
-    'Service Worker', 'Content Script', 'Manifest', 'DevTools', 'WebAssembly'
+    'Service Worker', 'Content Script', 'Manifest', 'DevTools', 'WebAssembly',
+
+    // Web APIs & Audio / Media concepts (LWS / Web Dev Best Practice)
+    'AudioContext', 'OfflineAudioContext', 'audio context', 'offline audio context',
+    'Web Audio API', 'web audio api', 'Web Audio', 'web audio',
+    'AudioNode', 'AudioDestination', 'GainNode', 'OscillatorNode', 'AudioBuffer',
+    'audio element', 'audio elements', '<audio>', '<video>', '<canvas>',
+    'sound track', 'song track', 'audio track', 'audio data',
+    'boombox', 'DOM', 'DOM tree', 'accessibility',
+    'event listener', 'event listeners', 'callback', 'callbacks',
+    'Promise', 'Promises', 'async', 'await', 'async/await',
+    'fetch', 'request', 'response'
   ];
 
   /**
@@ -273,6 +284,23 @@ window.TermGuardian = (function () {
       .replace(/স্বাচ্ছন্দ্য\s*বোধ\s*করেন\s*তবে\s*এটি\s*সাহায্য\s*করবে/gi,
         'ভালো জানা থাকলে বা স্বাচ্ছন্দ্য থাকলে আপনার জন্য সুবিধা হবে')
       .replace(/প্রাক-প্রয়োজনীয়\s*জ্ঞান|পূর্বশর্ত\s*জ্ঞান/gi, 'প্রয়োজনীয় পূর্বজ্ঞান')
+
+      // Web Audio & DOM natural phrasing (Sumit Saha / LWS style)
+      .replace(/অডিও\s*প্রসঙ্গ/gi, 'AudioContext')
+      .replace(/অফলাইন\s*অডিও\s*প্রসঙ্গ/gi, 'OfflineAudioContext')
+      .replace(/প্রসঙ্গ\s*তৈরি\s*করেছি/gi, 'AudioContext তৈরি করেছি')
+      .replace(/কিছু\s*শব্দ\s*প্রয়োজন/gi, 'সাউন্ড প্লে করার জন্য অডিও সোর্স প্রয়োজন')
+      .replace(/কিছু\s*শব্দ\s*প্রয়োজন/gi, 'সাউন্ড প্লে করার জন্য অডিও সোর্স প্রয়োজন')
+      .replace(/শব্দ\s*প্লে\s*কর/gi, 'সাউন্ড প্লে কর')
+      .replace(/শব্দ\s*চালানো/gi, 'সাউন্ড চালানো')
+      .replace(/শব্দটি\s*প্লে/gi, 'সাউন্ডটি প্লে')
+      .replace(/একটি\s*সম্পূর্ণ\s*গানের\s*ট্র্যাক/gi, 'একটি সম্পূর্ণ অডিও বা গানের ট্র্যাক')
+      .replace(/গান\s*চালানো/gi, 'অডিও বা গান প্লে করা')
+      .replace(/অ্যাক্সেসিবিলিটির\s*জন্য,/gi, 'accessibility-এর সুবিধার জন্য,')
+      .replace(/পৃষ্ঠায়\s*উন্মোচিত/gi, 'পেজের DOM-এ যুক্ত')
+      .replace(/পৃষ্ঠায়\s*উন্মোচিত/gi, 'পেজের DOM-এ যুক্ত')
+      .replace(/উন্মোচিত\s*করা\s*হয়েছে/gi, 'DOM-এ যুক্ত করা হয়েছে')
+      .replace(/উন্মোচিত\s*করা/gi, 'যুক্ত করা')
 
       // Fix spaces before Bengali punctuation marks
       .replace(/\s+([।,;!?])/g, '$1')

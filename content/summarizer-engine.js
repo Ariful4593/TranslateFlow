@@ -74,27 +74,34 @@ window.SummarizerEngine = (function () {
   }
 
   /**
-   * Smart Linguistic Fallback:
-   * Extracts the most informative, central ideas from text and simplifies dense clauses.
+   * Smart Linguistic Fallback (Learn with Sumit - LWS Explanatory Technique):
+   * Breaks complex technical text into crystal-clear, intuitive takeaways:
+   * 1. 🎯 মূল বিষয় (The Core Concept in simple terms)
+   * 2. ⚙️ কীভাবে কাজ করে (Working Mechanism)
+   * 3. 💡 বাস্তব সুবিধা বা টিপস (Practical Value / Best Practice)
    */
   function smartExtractKeyPoints(text, lang = 'bn') {
     if (!text || !text.trim()) return [];
 
+    let processedText = text;
+    if (lang === 'bn' && window.TermGuardian?.postProcessBengaliText) {
+      processedText = window.TermGuardian.postProcessBengaliText(processedText);
+    }
+
     // Split on sentence boundaries (Bangla dari, period, exclamation, question mark, newline)
-    const rawSentences = text
+    const rawSentences = processedText
       .split(/(?<=[।!?\n])|(?<=\.\s+)/g)
       .map((s) => s.trim())
       .filter((s) => s.length > 12);
 
-    if (rawSentences.length === 0) return [text.trim()];
+    if (rawSentences.length === 0) return [processedText.trim()];
 
-    const simplifiedPoints = [];
+    const candidates = [];
 
     for (let i = 0; i < rawSentences.length; i++) {
       let s = rawSentences[i];
 
       // Remove nested parenthetical clauses if they make the sentence overly dense
-      // Keep technical terms if short, but trim long definitions inside brackets
       s = s.replace(/\s*—[^—]{15,}—\s*/g, ', ');
       s = s.replace(/\s*\([^)]*[\w\s]{25,}[^)]*\)\s*/g, ' ');
       s = s.replace(/\s+/g, ' ').trim();
@@ -102,24 +109,32 @@ window.SummarizerEngine = (function () {
       // Skip introductory filler sentences
       if (
         /^(In fact|Notice that|As you know|Furthermore|Moreover|প্রকৃতপক্ষে|উল্লেখ্য যে|যেমনটি আমরা জানি)/i.test(s) &&
-        simplifiedPoints.length > 0
+        candidates.length > 0
       ) {
         continue;
       }
 
       if (s.length >= 18) {
-        simplifiedPoints.push(s);
+        candidates.push(s);
       }
 
-      if (simplifiedPoints.length >= 3) break;
+      if (candidates.length >= 3) break;
     }
 
-    // If still empty or only 1 long block, fallback to first 2 sentences
-    if (simplifiedPoints.length === 0) {
-      return rawSentences.slice(0, 2);
-    }
+    const pointsList = candidates.length > 0 ? candidates : rawSentences.slice(0, 2);
 
-    return simplifiedPoints;
+    // Apply Learn with Sumit (LWS) structured conceptual prefixes
+    const isEn = lang === 'en';
+    const prefixes = isEn
+      ? ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: ']
+      : ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: '];
+
+    return pointsList.map((pt, idx) => {
+      const cleanPt = pt.replace(/^[-*•#\d.]+\s*/, '').trim();
+      if (/^(🎯|⚙️|💡)/.test(cleanPt)) return cleanPt;
+      const prefix = prefixes[idx] || (isEn ? '• ' : '• ');
+      return `${prefix}${cleanPt}`;
+    });
   }
 
   /**
@@ -192,8 +207,8 @@ window.SummarizerEngine = (function () {
     try {
       if (typeof window.ai !== 'undefined' && typeof window.ai.languageModel?.create === 'function') {
         const systemPrompt = isEn
-          ? 'Summarize into 2-3 concise, crystal-clear bullet points for a general reader. Keep technical and API names intact. Output only bullet points.'
-          : 'Summarize into 2-3 concise, crystal-clear bullet points in Bengali (বাংলা) for easy understanding. Keep technical terms and API names intact. Output only bullet points.';
+          ? 'You are a master technical educator explaining concepts with utmost simplicity, intuition, and real-world clarity. Summarize into 2-3 structured takeaways (1. Core Concept in 1 line, 2. How it works, 3. Practical intuition). Keep all technical terms, code, and API names intact. Output only bullet points.'
+          : 'আপনি সুমিত সাহা (Learn with Sumit)-এর মতো অত্যন্ত সহজে, প্রাঞ্জল ও বন্ধুত্বপূর্ণ ভাষায় প্রোগ্রামিং কনসেপ্ট বুঝিয়ে দেন। টেক্সটটিকে ২-৩টি পয়েন্টে বুঝিয়ে দিন: ১. মূল বিষয় (সহজ কথায় ১ লাইনে), ২. কীভাবে কাজ করে, ৩. বাস্তব প্রয়োগ বা সুবিধা। সব টেকনিক্যাল টার্ম ও API নাম (যেমন AudioContext, DOM, API ইত্যাদি) ইংরেজিতেই অক্ষত রাখুন। কোনো আক্ষরিক বা রোবটিক অনুবাদ করবেন না। শুধু পয়েন্টগুলো লিখুন।';
 
         const session = await window.ai.languageModel.create({
           systemPrompt: systemPrompt
@@ -227,7 +242,7 @@ window.SummarizerEngine = (function () {
   }
 
   /**
-   * Formats bullet points into clean, accessible HTML and plain text.
+   * Formats bullet points into clean, accessible HTML and plain text with zero extra whitespace.
    */
   function formatResult(points, engine, targetLang) {
     const isEn = targetLang === 'en';
@@ -237,17 +252,7 @@ window.SummarizerEngine = (function () {
       .map((p) => `<li class="bt-summary-item">${escapeHtml(p)}</li>`)
       .join('');
 
-    const html = `
-      <div class="bt-summary-container">
-        <div class="bt-summary-header">
-          <span class="bt-summary-badge">${badgeLabel}</span>
-          <span class="bt-summary-engine">${engine}</span>
-        </div>
-        <ul class="bt-summary-list">
-          ${itemsHtml}
-        </ul>
-      </div>
-    `;
+    const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">${engine}</span></div><ul class="bt-summary-list">${itemsHtml}</ul></div>`.trim();
 
     const plainText = `${badgeLabel}:\n` + points.map((p) => `• ${p}`).join('\n');
 
