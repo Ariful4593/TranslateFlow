@@ -206,15 +206,19 @@ window.SummarizerEngine = (function () {
     // Attempt 2: Chrome Prompt API (window.ai.languageModel)
     try {
       if (typeof window.ai !== 'undefined' && typeof window.ai.languageModel?.create === 'function') {
-        const systemPrompt = isEn
-          ? 'You are a master technical educator explaining concepts with utmost simplicity, intuition, and real-world clarity. Summarize into 2-3 structured takeaways (1. Core Concept in 1 line, 2. How it works, 3. Practical intuition). Keep all technical terms, code, and API names intact. Output only bullet points.'
-          : 'আপনি সুমিত সাহা (Learn with Sumit)-এর মতো অত্যন্ত সহজে, প্রাঞ্জল ও বন্ধুত্বপূর্ণ ভাষায় প্রোগ্রামিং কনসেপ্ট বুঝিয়ে দেন। টেক্সটটিকে ২-৩টি পয়েন্টে বুঝিয়ে দিন: ১. মূল বিষয় (সহজ কথায় ১ লাইনে), ২. কীভাবে কাজ করে, ৩. বাস্তব প্রয়োগ বা সুবিধা। সব টেকনিক্যাল টার্ম ও API নাম (যেমন AudioContext, DOM, API ইত্যাদি) ইংরেজিতেই অক্ষত রাখুন। কোনো আক্ষরিক বা রোবটিক অনুবাদ করবেন না। শুধু পয়েন্টগুলো লিখুন।';
+        const systemPrompt = window.PromptHarness?.buildSystemPrompt
+          ? window.PromptHarness.buildSystemPrompt(targetLang, 'summarization')
+          : (isEn
+              ? 'You are a master technical educator explaining concepts with utmost simplicity, intuition, and real-world clarity. Summarize into 2-3 structured takeaways (1. Core Concept in 1 line, 2. How it works, 3. Practical intuition). Keep all technical terms, code, and API names intact. Output only bullet points.'
+              : 'আপনি সুমিত সাহা (Learn with Sumit)-এর মতো অত্যন্ত সহজে, প্রাঞ্জল ও বন্ধুত্বপূর্ণ ভাষায় প্রোগ্রামিং কনসেপ্ট বুঝিয়ে দেন। টেক্সটটিকে ৩টি পয়েন্টে বুঝিয়ে দিন: 🎯 মূল বিষয় (সহজ কথায় ১ লাইনে), ⚙️ কীভাবে কাজ করে, 💡 বাস্তব সুবিধা। সব টেকনিক্যাল টার্ম ও API নাম ইংরেজিতেই অক্ষত রাখুন। সরাসরি ৩টি বুলেট পয়েন্ট লিখুন।');
 
         const session = await window.ai.languageModel.create({
           systemPrompt: systemPrompt
         });
 
-        const promptText = `Summarize this text:\n\n${textToProcess}`;
+        const promptText = window.PromptHarness?.buildUserPrompt
+          ? window.PromptHarness.buildUserPrompt(textToProcess, targetLang)
+          : `Summarize this text:\n\n${textToProcess}`;
         const modelOutput = await Promise.race([
           session.prompt(promptText),
           new Promise((_, reject) => setTimeout(() => reject(new Error('Prompt timeout')), 3000))

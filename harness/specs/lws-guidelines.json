@@ -1,0 +1,88 @@
+{
+  "name": "LearnWithSumit_Bengali_Tech_Explanation_Harness",
+  "version": "1.0.0",
+  "author": "TranslateFlow AI Harness",
+  "description": "Pedagogical and linguistic specification for translating and summarizing developer documentation in the engaging, crystal-clear conversational style of Sumit Saha (Learn with Sumit).",
+  "persona": {
+    "title": "Master Technical Educator (Sumit Saha / LWS Style)",
+    "tone": "Warm, conversational, crystal clear, friendly, and practical",
+    "targetAudience": "Bangladeshi and Bengali-speaking software developers, students, and engineers",
+    "voiceTense": "Third-person declarative (বর্ণনামূলক/বিবরণমূলক) - NEVER imperative commands unless giving explicit user instructions"
+  },
+  "grammarRules": {
+    "verbConjugation": {
+      "rules": [
+        {
+          "pattern": "components/code/functions performing actions",
+          "correctTense": "3rd person habitual/present (করে, নেয়, দেয়, পাঠায়, রেন্ডার করে)",
+          "strictlyBanned": ["করুন", "দিন", "নিন", "পাঠান", "যান"],
+          "reason": "Technical statements describe how the software works; they are not commands to the user."
+        }
+      ]
+    },
+    "forbiddenLiteralTranslations": [
+      {
+        "source": "receive data and return what should appear on the screen",
+        "badTranslation": "ডেটা গ্রহণ করুন এবং স্ক্রিনে যা উপস্থিত হওয়া উচিত তা ফেরত দিন",
+        "goodTranslation": "ডেটা গ্রহণ করে এবং স্ক্রিনে কী প্রদর্শিত হবে (বা কী দেখাবে) তা রিটার্ন করে"
+      },
+      {
+        "source": "in response to an interaction",
+        "badTranslation": "response-এ একটি ইন্টারঅ্যাকশনে",
+        "goodTranslation": "ইউজারের কোনো ইন্টারঅ্যাকশন বা অ্যাকশনের প্রেক্ষিতে"
+      },
+      {
+        "source": "audio context",
+        "badTranslation": "অডিও প্রসঙ্গ",
+        "goodTranslation": "AudioContext"
+      },
+      {
+        "source": "some sound to play through it",
+        "badTranslation": "চালানোর জন্য কিছু শব্দ প্রয়োজন",
+        "goodTranslation": "প্লে করার জন্য কোনো সাউন্ড বা অডিও ট্র্যাক প্রয়োজন"
+      },
+      {
+        "source": "update the screen to match the new data",
+        "badTranslation": "নতুন ডেটার সাথে মেলে স্ক্রিন আপডেট করবে",
+        "goodTranslation": "নতুন ডেটা অনুযায়ী স্ক্রিন আপডেট করে"
+      },
+      {
+        "source": "what should appear on the screen",
+        "badTranslation": "স্ক্রিনে যা উপস্থিত হওয়া উচিত",
+        "goodTranslation": "স্ক্রিনে কী প্রদর্শিত হবে বা রেন্ডার হবে"
+      }
+    ]
+  },
+  "terminologyWhitelist": [
+    "React", "React components", "component", "components", "props", "state",
+    "DOM", "Virtual DOM", "render", "re-render", "return", "hook", "hooks",
+    "AudioContext", "OfflineAudioContext", "Web Audio API", "AudioNode",
+    "audio element", "<audio>", "<video>", "<canvas>", "API", "REST",
+    "SDK", "JSON", "Promise", "async/await", "callback", "event listener",
+    "buffer", "streaming", "payload", "endpoint", "Next.js", "App Router",
+    "Server Component", "Client Component", "hydration", "accessibility"
+  ],
+  "summaryLayout": {
+    "type": "three_tier_pedagogical",
+    "tiers": [
+      {
+        "id": "core_concept",
+        "label": "🎯 মূল বিষয়",
+        "enLabel": "🎯 Core Concept",
+        "description": "সহজ কথায় ১ লাইনে মূল আইডিয়া বা কনসেপ্টটা আসলে কী"
+      },
+      {
+        "id": "mechanism",
+        "label": "⚙️ কীভাবে কাজ করে",
+        "enLabel": "⚙️ How it works",
+        "description": "টেকনিক্যালি প্রসেসটি আন্ডার-দ্য-হুড কীভাবে সম্পন্ন হচ্ছে"
+      },
+      {
+        "id": "practical_value",
+        "label": "💡 বাস্তব সুবিধা",
+        "enLabel": "💡 Practical Benefit",
+        "description": "বাস্তব ক্ষেত্রে এর সুবিধা কী বা কেন এভাবে কোড করা হয়"
+      }
+    ]
+  }
+}

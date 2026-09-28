@@ -302,6 +302,20 @@ window.TermGuardian = (function () {
       .replace(/উন্মোচিত\s*করা\s*হয়েছে/gi, 'DOM-এ যুক্ত করা হয়েছে')
       .replace(/উন্মোচিত\s*করা/gi, 'যুক্ত করা')
 
+      // React & UI Data Flow natural phrasing (Fix imperative verbs & awkward machine translation)
+      .replace(/React\s*components\s*ডেটা\s*গ্রহণ\s*করুন/gi, 'React components ডেটা গ্রহণ করে')
+      .replace(/ডেটা\s*গ্রহণ\s*করুন/gi, 'ডেটা গ্রহণ করে')
+      .replace(/(?:স্ক্রিনে\s*)?যা\s*উপস্থিত\s*হওয়া\s*উচিত\s*তা\s*ফেরত\s*দিন/gi, 'স্ক্রিনে কী প্রদর্শিত হবে তা রিটার্ন করে')
+      .replace(/স্ক্রিনে\s*যা\s*উপস্থিত\s*হওয়া\s*উচিত/gi, 'স্ক্রিনে কী প্রদর্শিত হবে')
+      .replace(/উপস্থিত\s*হওয়া\s*উচিত/gi, 'প্রদর্শিত হওয়া উচিত')
+      .replace(/তা\s*ফেরত\s*দিন/gi, 'তা রিটার্ন করে')
+      .replace(/ফেরত\s*দিন/gi, 'রিটার্ন করে')
+      .replace(/(?:তাদের\s*)?response-এ\s*একটি\s*ইন্টারঅ্যাকশনে/gi, 'ইউজারের কোনো ইন্টারঅ্যাকশন বা অ্যাকশনের প্রেক্ষিতে')
+      .replace(/ব্যবহারকারী\s*যখন/gi, 'ইউজার যখন')
+      .replace(/একটি\s*ইনপুটে\s*টাইপ\s*করে/gi, 'ইনপুট ফিল্ডে কিছু টাইপ করে')
+      .replace(/নতুন\s*ডেটার\s*সাথে\s*মেলে\s*স্ক্রিন\s*আপডেট\s*(?:করবে|করে)/gi, 'নতুন ডেটা অনুযায়ী স্ক্রিন আপডেট করে')
+      .replace(/সাথে\s*মেলে\s*স্ক্রিন\s*আপডেট/gi, 'অনুযায়ী স্ক্রিন আপডেট')
+
       // Fix spaces before Bengali punctuation marks
       .replace(/\s+([।,;!?])/g, '$1')
       // Ensure single space after Bengali dari or comma if followed by a letter

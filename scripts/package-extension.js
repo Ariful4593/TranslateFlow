@@ -34,7 +34,8 @@ const includeItems = [
   'background',
   'content',
   'popup',
-  'icons'
+  'icons',
+  'harness'
 ];
 
 console.log(`Packaging TranslateFlow v${version}...`);

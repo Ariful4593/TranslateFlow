@@ -36,6 +36,7 @@
       ],
       "js": [
         "content/term-guardian.js",
+        "harness/prompt-harness.js",
         "content/translator-engine.js",
         "content/summarizer-engine.js",
         "content/ui-popover.js",

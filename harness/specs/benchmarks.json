@@ -1,0 +1,29 @@
+[
+  {
+    "id": "react-components-data-flow",
+    "name": "React Components & State Reactivity",
+    "sourceText": "React components receive data and return what should appear on the screen. You can pass them new data in response to an interaction, like when the user types into an input. React will then update the screen to match the new data.",
+    "targetLanguage": "bn",
+    "requiredTerms": ["React components", "React"],
+    "forbiddenSubstrings": ["গ্রহণ করুন", "ফেরত দিন", "উপস্থিত হওয়া উচিত", "তাদের response-এ", "মেলে স্ক্রিন"],
+    "expectedSummaryMarkers": ["🎯 মূল বিষয়", "⚙️ কীভাবে কাজ করে", "💡 বাস্তব সুবিধা"]
+  },
+  {
+    "id": "mdn-web-audio-loading",
+    "name": "MDN Web Audio API Loading Sound",
+    "sourceText": "Now, the audio context we've created needs some sound to play through it. There are a few ways to do this with the API. Let's begin with a simple method — as we have a boombox, we most likely want to play a full song track. Also, for accessibility, it's nice to expose that track in the DOM. We'll expose the song on the page using an <audio> element.",
+    "targetLanguage": "bn",
+    "requiredTerms": ["AudioContext", "DOM", "<audio>"],
+    "forbiddenSubstrings": ["অডিও প্রসঙ্গ", "কিছু শব্দ প্রয়োজন", "শব্দ চালানো", "উন্মোচিত করা"],
+    "expectedSummaryMarkers": ["🎯 মূল বিষয়", "⚙️ কীভাবে কাজ করে", "💡 বাস্তব সুবিধা"]
+  },
+  {
+    "id": "nextjs-streaming-granularity",
+    "name": "Next.js Streaming & Suspense Boundaries",
+    "sourceText": "Granular streaming with Suspense allows sibling components to resolve independently without a single blocking pass. Static content can be delivered immediately while personalized data streams in.",
+    "targetLanguage": "bn",
+    "requiredTerms": ["Suspense", "streaming"],
+    "forbiddenSubstrings": ["দানাদার স্ট্রিমিং", "ভাইবোন উপাদান", "ব্লকিং পাস"],
+    "expectedSummaryMarkers": ["🎯 মূল বিষয়", "⚙️ কীভাবে কাজ করে", "💡 বাস্তব সুবিধা"]
+  }
+]
