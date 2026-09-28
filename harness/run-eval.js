@@ -51,7 +51,9 @@ const rawMachineTranslations = {
   'mdn-web-audio-loading':
     'এখন, আমরা যে অডিও প্রসঙ্গ তৈরি করেছি তা চালানোর জন্য কিছু শব্দ প্রয়োজন। API এর সাথে এটি করার কয়েকটি উপায় রয়েছে। আসুন একটি সহজ পদ্ধতি দিয়ে শুরু করা যাক — যেহেতু আমাদের একটি বুমবক্স আছে, আমরা সম্ভবত একটি সম্পূর্ণ গানের ট্র্যাক চালাতে চাই। এছাড়াও, অ্যাক্সেসিবিলিটির জন্য, সেই ট্র্যাকটিকে DOM-এ উন্মোচিত করা ভালো। আমরা <audio> এলিমেন্ট ব্যবহার করে পেজে গানটি উন্মোচিত করব।',
   'nextjs-streaming-granularity':
-    'Suspense এর সাথে দানাদার স্ট্রিমিং একক ব্লকিং পাস ছাড়াই ভাইবোন উপাদান গুলিকে স্বাধীনভাবে সমাধান করতে দেয়। ব্যক্তিগতকৃত ডেটা streaming করার সময় স্ট্যাটিক বিষয়বস্তু অবিলম্বে সরবরাহ করা যেতে পারে।'
+    'Suspense এর সাথে দানাদার স্ট্রিমিং একক ব্লকিং পাস ছাড়াই ভাইবোন উপাদান গুলিকে স্বাধীনভাবে সমাধান করতে দেয়। ব্যক্তিগতকৃত ডেটা streaming করার সময় স্ট্যাটিক বিষয়বস্তু অবিলম্বে সরবরাহ করা যেতে পারে।',
+  'react-architecture-hindi':
+    'React एक वास्तुकला भी है। फ्रेमवर्क जो इसे लागू करते हैं, आपको fetch डेटा को अतुल्यकालिक components में सर्वर पर या निर्माण के दौरान भी चलाने की सुविधा देता है। किसी फ़ाइल या डेटाबेस से डेटा पढ़ें, और इसे अपने इंटरैक्टिव components में पास करें।'
 };
 
 benchmarks.forEach((bench) => {
@@ -61,7 +63,9 @@ benchmarks.forEach((bench) => {
   const rawTranslation = rawMachineTranslations[bench.id] || bench.sourceText;
   
   // 1. Process translation through TermGuardian
-  const cleanedTranslation = window.TermGuardian.postProcessBengaliText(rawTranslation);
+  const cleanedTranslation = bench.targetLanguage === 'bn'
+    ? window.TermGuardian.postProcessBengaliText(rawTranslation)
+    : rawTranslation;
 
   // 2. Generate summary points using SummarizerEngine
   const summaryPoints = window.SummarizerEngine.smartExtractKeyPoints(
@@ -84,13 +88,13 @@ benchmarks.forEach((bench) => {
   let grammarScore = 25;
   const foundForbidden = [];
   bench.forbiddenSubstrings.forEach((forbidden) => {
-    if (cleanedTranslation.includes(forbidden)) {
+    if (cleanedTranslation.includes(forbidden) || summaryPoints.some(pt => pt.includes(forbidden))) {
       grammarScore -= 10;
       foundForbidden.push(forbidden);
     }
   });
-  // Check for any remaining imperative command verbs
-  if (/(\b|\s)(করুন|দিন|নিন|পাঠান)(\b|\s|[।!?])/i.test(cleanedTranslation)) {
+  // Check for any remaining Bengali imperative command verbs
+  if (bench.targetLanguage === 'bn' && /(\b|\s)(করুন|দিন|নিন|পাঠান)(\b|\s|[।!?])/i.test(cleanedTranslation)) {
     grammarScore -= 10;
     foundForbidden.push('imperative verb');
   }

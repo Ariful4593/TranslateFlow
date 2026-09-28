@@ -1286,25 +1286,32 @@ window.UIPopover = (function () {
       dirEl.textContent = `${sourceLabel} ➔ ${targetLabel}`;
     }
 
-    const isNonBn = currentTargetLang !== 'bn';
+    const i18n = window.PromptHarness?.getI18nLabels
+      ? window.PromptHarness.getI18nLabels(currentTargetLang)
+      : (currentTargetLang === 'bn'
+          ? { copy: 'কপি', listen: 'শুনুন', replace: '⇄ প্রতিস্থাপন', summary: 'সারসংক্ষেপ', fullText: '↩ মূল অনুবাদ' }
+          : (currentTargetLang === 'hi'
+              ? { copy: 'कॉपी', listen: 'सुनें', replace: '⇄ बदलें', summary: 'सारांश', fullText: '↩ मूल अनुवाद' }
+              : { copy: 'Copy', listen: 'Listen', replace: '⇄ Replace', summary: 'Summary', fullText: '↩ Full Text' }));
+
     const copyBtn = shadowRoot.getElementById('bt-copy');
     if (copyBtn) {
       const copySpan = copyBtn.querySelector('span');
-      if (copySpan) copySpan.textContent = isNonBn ? 'Copy' : 'কপি';
-      copyBtn.title = isNonBn ? 'Copy translation' : 'অনুবাদ কপি করুন';
+      if (copySpan) copySpan.textContent = i18n.copy;
+      copyBtn.title = i18n.copy;
     }
 
     const speakBtn = shadowRoot.getElementById('bt-speak');
     if (speakBtn) {
       speakBtn.style.display = uiSettings.enableTts ? 'inline-flex' : 'none';
       const speakSpan = speakBtn.querySelector('span');
-      if (speakSpan) speakSpan.textContent = isNonBn ? 'Listen' : 'শুনুন';
-      speakBtn.title = isNonBn ? 'Listen to translation' : 'অনুবাদ শুনুন';
+      if (speakSpan) speakSpan.textContent = i18n.listen;
+      speakBtn.title = i18n.listen;
     }
 
     const replaceBtn = shadowRoot.getElementById('bt-replace');
     if (replaceBtn) {
-      replaceBtn.innerHTML = isNonBn ? '<span>⇄ Replace</span>' : '<span>⇄ প্রতিস্থাপন</span>';
+      replaceBtn.innerHTML = `<span>${i18n.replace}</span>`;
     }
 
     // Reset summary state
@@ -1316,8 +1323,8 @@ window.UIPopover = (function () {
     if (sumBtn) {
       sumBtn.classList.remove('active');
       const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
-      if (sumSpan) sumSpan.textContent = isNonBn ? 'Summary' : 'সারসংক্ষেপ';
-      sumBtn.title = isNonBn ? 'Summarize key points' : 'সহজ ভাষায় মূল সারসংক্ষেপ দেখুন';
+      if (sumSpan) sumSpan.textContent = i18n.summary;
+      sumBtn.title = i18n.summary;
     }
 
     hideTrigger(true); // immediately hide trigger
@@ -1578,7 +1585,13 @@ window.UIPopover = (function () {
     const contentBox = shadowRoot.getElementById('bt-content');
     if (!contentBox) return;
 
-    const isEn = currentTargetLang === 'en';
+    const i18n = window.PromptHarness?.getI18nLabels
+      ? window.PromptHarness.getI18nLabels(currentTargetLang)
+      : (currentTargetLang === 'bn'
+          ? { summary: 'সারসংক্ষেপ', fullText: '↩ মূল অনুবাদ', summarizing: 'সহজ ভাষায় সারসংক্ষেপ তৈরি হচ্ছে...', badge: '💡 সহজ ভাষায় সারসংক্ষেপ' }
+          : (currentTargetLang === 'hi'
+              ? { summary: 'सारांश', fullText: '↩ मूल अनुवाद', summarizing: 'सरल भाषा में सारांश तैयार हो रहा है...', badge: '💡 मुख्य बातें (सरल सारांश)' }
+              : { summary: 'Summary', fullText: '↩ Full Text', summarizing: 'Summarizing content...', badge: '💡 Key Takeaways' }));
 
     // If currently showing summary, restore full translation
     if (isShowingSummary) {
@@ -1586,8 +1599,8 @@ window.UIPopover = (function () {
       if (sumBtn) {
         sumBtn.classList.remove('active');
         const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
-        if (sumSpan) sumSpan.textContent = isEn ? 'Summary' : 'সারসংক্ষেপ';
-        sumBtn.title = isEn ? 'Summarize key points' : 'সহজ ভাষায় মূল সারসংক্ষেপ দেখুন';
+        if (sumSpan) sumSpan.textContent = i18n.summary;
+        sumBtn.title = i18n.summary;
       }
       contentBox.style.animation = 'none';
       void contentBox.offsetWidth;
@@ -1603,8 +1616,8 @@ window.UIPopover = (function () {
     if (sumBtn) {
       sumBtn.classList.add('active');
       const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
-      if (sumSpan) sumSpan.textContent = isEn ? '↩ Full Text' : '↩ মূল অনুবাদ';
-      sumBtn.title = isEn ? 'Return to full translation' : 'সম্পূর্ণ অনুবাদে ফিরে যান';
+      if (sumSpan) sumSpan.textContent = i18n.fullText;
+      sumBtn.title = i18n.fullText;
     }
 
     // If already generated for this active selection, render instantly
@@ -1620,7 +1633,7 @@ window.UIPopover = (function () {
     contentBox.innerHTML = `
       <div class="bt-summary-loading">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="#2563eb" style="animation: btPulse 1.2s infinite;"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
-        <span>${isEn ? 'Summarizing content...' : 'সহজ ভাষায় সারসংক্ষেপ তৈরি হচ্ছে...'}</span>
+        <span>${i18n.summarizing}</span>
       </div>
       <div class="bt-loading-skeleton" style="margin-top: 8px;">
         <div class="bt-skeleton-line"></div>
@@ -1653,7 +1666,7 @@ window.UIPopover = (function () {
           ? window.SummarizerEngine.smartExtractKeyPoints(currentTranslatedText, currentTargetLang)
           : [currentTranslatedText];
 
-        const badgeLabel = isEn ? '💡 Key Takeaways' : '💡 সহজ ভাষায় সারসংক্ষেপ';
+        const badgeLabel = i18n.badge;
         const items = fallbackPoints.map((p) => `<li class="bt-summary-item">${p}</li>`).join('');
         const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">Smart Summary</span></div><ul class="bt-summary-list">${items}</ul></div>`.trim();
         currentSummaryData = {

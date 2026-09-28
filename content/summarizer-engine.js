@@ -123,16 +123,20 @@ window.SummarizerEngine = (function () {
 
     const pointsList = candidates.length > 0 ? candidates : rawSentences.slice(0, 2);
 
-    // Apply Learn with Sumit (LWS) structured conceptual prefixes
-    const isEn = lang === 'en';
-    const prefixes = isEn
-      ? ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: ']
-      : ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: '];
+    // Apply structured conceptual prefixes according to target language
+    const i18n = window.PromptHarness?.getI18nLabels
+      ? window.PromptHarness.getI18nLabels(lang)
+      : (lang === 'bn'
+          ? { prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: '] }
+          : (lang === 'hi'
+              ? { prefixes: ['🎯 मुख्य विषय: ', '⚙️ यह कैसे काम करता है: ', '💡 व्यावहारिक लाभ: '] }
+              : { prefixes: ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: '] }));
+    const prefixes = i18n.prefixes || ['🎯 ', '⚙️ ', '💡 '];
 
     return pointsList.map((pt, idx) => {
       const cleanPt = pt.replace(/^[-*•#\d.]+\s*/, '').trim();
       if (/^(🎯|⚙️|💡)/.test(cleanPt)) return cleanPt;
-      const prefix = prefixes[idx] || (isEn ? '• ' : '• ');
+      const prefix = prefixes[idx] || (lang === 'bn' ? '• ' : '• ');
       return `${prefix}${cleanPt}`;
     });
   }
@@ -249,8 +253,14 @@ window.SummarizerEngine = (function () {
    * Formats bullet points into clean, accessible HTML and plain text with zero extra whitespace.
    */
   function formatResult(points, engine, targetLang) {
-    const isEn = targetLang === 'en';
-    const badgeLabel = isEn ? '💡 Key Takeaways' : '💡 সহজ ভাষায় সারসংক্ষেপ';
+    const i18n = window.PromptHarness?.getI18nLabels
+      ? window.PromptHarness.getI18nLabels(targetLang)
+      : (targetLang === 'bn'
+          ? { badge: '💡 সহজ ভাষায় সারসংক্ষেপ' }
+          : (targetLang === 'hi'
+              ? { badge: '💡 मुख्य बातें (सरल सारांश)' }
+              : { badge: '💡 Key Takeaways' }));
+    const badgeLabel = i18n.badge || '💡 Key Takeaways';
 
     const itemsHtml = points
       .map((p) => `<li class="bt-summary-item">${escapeHtml(p)}</li>`)

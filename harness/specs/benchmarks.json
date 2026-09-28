@@ -25,5 +25,14 @@
     "requiredTerms": ["Suspense", "streaming"],
     "forbiddenSubstrings": ["দানাদার স্ট্রিমিং", "ভাইবোন উপাদান", "ব্লকিং পাস"],
     "expectedSummaryMarkers": ["🎯 মূল বিষয়", "⚙️ কীভাবে কাজ করে", "💡 বাস্তব সুবিধা"]
+  },
+  {
+    "id": "react-architecture-hindi",
+    "name": "React Architecture (Hindi Multilingual Evaluation)",
+    "sourceText": "React is also an architecture. Frameworks that implement it let you fetch data in asynchronous components that run on the server or even during the build. Read data from a file or a database, and pass it down to your interactive components.",
+    "targetLanguage": "hi",
+    "requiredTerms": ["React", "components"],
+    "forbiddenSubstrings": ["মূল বিষয়", "কীভাবে কাজ করে", "বাস্তব সুবিধা", "সহজ ভাষায়"],
+    "expectedSummaryMarkers": ["🎯 मुख्य विषय", "⚙️ यह कैसे काम करता है", "💡 व्यावहारिक लाभ"]
   }
 ]

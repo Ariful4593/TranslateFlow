@@ -152,11 +152,11 @@ window.TermGuardian = (function () {
       }
     }
 
-    if (targetLang === 'en') {
-      return restored.replace(/[ \t]+/g, ' ').trim();
+    if (targetLang === 'bn') {
+      return postProcessBengaliText(restored);
     }
 
-    return postProcessBengaliText(restored);
+    return restored.replace(/[ \t]+/g, ' ').trim();
   }
 
   /**
