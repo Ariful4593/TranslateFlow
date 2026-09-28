@@ -37,6 +37,7 @@
       "js": [
         "content/term-guardian.js",
         "content/translator-engine.js",
+        "content/summarizer-engine.js",
         "content/ui-popover.js",
         "content/content.js"
       ],

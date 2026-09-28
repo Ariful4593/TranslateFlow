@@ -17,6 +17,9 @@ window.UIPopover = (function () {
   let isReplacedInPage = false;
   let replacedOriginalNode = null;
   let replacedNewNode = null;
+  let isShowingSummary = false;
+  let currentSummaryData = null;
+  let currentFormattedTranslationHtml = '';
 
   const LANGUAGE_NAMES = {
     bn: 'বাংলা',
@@ -464,6 +467,62 @@ window.UIPopover = (function () {
           to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Summary view styling */
+        .bt-summary-container {
+          animation: btFadeIn 0.25s ease;
+        }
+
+        .bt-summary-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 10px;
+        }
+
+        .bt-summary-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 11.5px;
+          font-weight: 600;
+          color: #2563eb;
+          background: rgba(37, 99, 235, 0.08);
+          padding: 3px 8px;
+          border-radius: 6px;
+        }
+
+        .bt-summary-engine {
+          font-size: 10.5px;
+          color: var(--bt-text-muted);
+          background: rgba(0, 0, 0, 0.04);
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+
+        .bt-summary-list {
+          margin: 0;
+          padding-left: 18px;
+          list-style-type: disc;
+        }
+
+        .bt-summary-item {
+          margin-bottom: 8px;
+          line-height: 1.6;
+        }
+
+        .bt-summary-item:last-child {
+          margin-bottom: 0;
+        }
+
+        .bt-summary-loading {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12.5px;
+          color: var(--bt-text-muted);
+          padding: 8px 0;
+        }
+
         @keyframes btShimmer {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
@@ -514,6 +573,11 @@ window.UIPopover = (function () {
             <span>⇄ প্রতিস্থাপন</span>
           </button>
 
+          <button class="bt-tool-btn" id="bt-summarize" title="সহজ ভাষায় মূল সারসংক্ষেপ দেখুন">
+            <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+            <span id="bt-summarize-text">সারসংক্ষেপ</span>
+          </button>
+
           <span class="bt-toast" id="bt-toast"></span>
         </div>
       </div>
@@ -561,11 +625,15 @@ window.UIPopover = (function () {
     // Copy button
     shadowRoot.getElementById('bt-copy').addEventListener('click', async (e) => {
       e.stopPropagation();
-      if (!currentTranslatedText) return;
+      const textToCopy = isShowingSummary && currentSummaryData?.plainText
+        ? currentSummaryData.plainText
+        : currentTranslatedText;
+
+      if (!textToCopy) return;
 
       const isEn = currentTargetLang === 'en';
       try {
-        await navigator.clipboard.writeText(currentTranslatedText);
+        await navigator.clipboard.writeText(textToCopy);
         showToast(isEn ? 'Copied!' : 'কপি হয়েছে!');
       } catch (err) {
         showToast(isEn ? 'Copy failed' : 'কপি ব্যর্থ');
@@ -575,8 +643,12 @@ window.UIPopover = (function () {
     // Listen / Speak button (Natural Voice TTS)
     shadowRoot.getElementById('bt-speak').addEventListener('click', (e) => {
       e.stopPropagation();
-      if (!currentTranslatedText) return;
-      playNaturalTTS(currentTranslatedText, currentTargetLang);
+      const textToSpeak = isShowingSummary && currentSummaryData?.plainText
+        ? currentSummaryData.plainText
+        : currentTranslatedText;
+
+      if (!textToSpeak) return;
+      playNaturalTTS(textToSpeak, currentTargetLang);
     });
 
     // Replace in page toggle
@@ -584,6 +656,15 @@ window.UIPopover = (function () {
       e.stopPropagation();
       toggleReplaceInPage();
     });
+
+    // Summarize button click
+    const sumBtn = shadowRoot.getElementById('bt-summarize');
+    if (sumBtn) {
+      sumBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSummarize();
+      });
+    }
   }
 
   /**
@@ -1216,6 +1297,19 @@ window.UIPopover = (function () {
       replaceBtn.innerHTML = isNonBn ? '<span>⇄ Replace</span>' : '<span>⇄ প্রতিস্থাপন</span>';
     }
 
+    // Reset summary state
+    isShowingSummary = false;
+    currentSummaryData = null;
+    currentFormattedTranslationHtml = '';
+
+    const sumBtn = shadowRoot.getElementById('bt-summarize');
+    if (sumBtn) {
+      sumBtn.classList.remove('active');
+      const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
+      if (sumSpan) sumSpan.textContent = isNonBn ? 'Summary' : 'সারসংক্ষেপ';
+      sumBtn.title = isNonBn ? 'Summarize key points' : 'সহজ ভাষায় মূল সারসংক্ষেপ দেখুন';
+    }
+
     hideTrigger(true); // immediately hide trigger
 
     // Reset card contents to loading skeleton
@@ -1356,6 +1450,18 @@ window.UIPopover = (function () {
       currentTargetLang = targetLang;
     }
     currentTranslatedText = translatedText;
+    isShowingSummary = false;
+    currentSummaryData = null;
+
+    const sumBtn = shadowRoot.getElementById('bt-summarize');
+    if (sumBtn) {
+      sumBtn.classList.remove('active');
+      const isEn = currentTargetLang === 'en';
+      const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
+      if (sumSpan) sumSpan.textContent = isEn ? 'Summary' : 'সারসংক্ষেপ';
+      sumBtn.title = isEn ? 'Summarize key points' : 'সহজ ভাষায় মূল সারসংক্ষেপ দেখুন';
+    }
+
     const contentBox = shadowRoot.getElementById('bt-content');
     const engineBadge = shadowRoot.getElementById('bt-engine');
 
@@ -1379,8 +1485,10 @@ window.UIPopover = (function () {
           const els = formatParagraphElements(p);
           els.forEach((el) => contentBox.appendChild(el));
         });
+        currentFormattedTranslationHtml = contentBox.innerHTML;
       } else {
         contentBox.textContent = '';
+        currentFormattedTranslationHtml = '';
       }
     }
   }
@@ -1449,6 +1557,111 @@ window.UIPopover = (function () {
     } catch (err) {
       console.warn('Replace in page failed:', err);
       showToast(isEn ? 'Replace failed' : 'প্রতিস্থাপন সম্ভব হয়নি');
+    }
+  }
+
+  /**
+   * Toggles between full translation and an easy-to-understand key points summary.
+   */
+  async function toggleSummarize() {
+    const sumBtn = shadowRoot.getElementById('bt-summarize');
+    const contentBox = shadowRoot.getElementById('bt-content');
+    if (!contentBox) return;
+
+    const isEn = currentTargetLang === 'en';
+
+    // If currently showing summary, restore full translation
+    if (isShowingSummary) {
+      isShowingSummary = false;
+      if (sumBtn) {
+        sumBtn.classList.remove('active');
+        const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
+        if (sumSpan) sumSpan.textContent = isEn ? 'Summary' : 'সারসংক্ষেপ';
+        sumBtn.title = isEn ? 'Summarize key points' : 'সহজ ভাষায় মূল সারসংক্ষেপ দেখুন';
+      }
+      contentBox.style.animation = 'none';
+      void contentBox.offsetWidth;
+      contentBox.style.animation = 'btFadeIn 0.2s ease';
+      contentBox.innerHTML = currentFormattedTranslationHtml || currentTranslatedText;
+      return;
+    }
+
+    // Switch to summary view
+    if (!currentTranslatedText && !originalSelectedText) return;
+
+    isShowingSummary = true;
+    if (sumBtn) {
+      sumBtn.classList.add('active');
+      const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
+      if (sumSpan) sumSpan.textContent = isEn ? '↩ Full Text' : '↩ মূল অনুবাদ';
+      sumBtn.title = isEn ? 'Return to full translation' : 'সম্পূর্ণ অনুবাদে ফিরে যান';
+    }
+
+    // If already generated for this active selection, render instantly
+    if (currentSummaryData && currentSummaryData.html) {
+      contentBox.style.animation = 'none';
+      void contentBox.offsetWidth;
+      contentBox.style.animation = 'btFadeIn 0.2s ease';
+      contentBox.innerHTML = currentSummaryData.html;
+      return;
+    }
+
+    // Show shimmering loading skeleton
+    contentBox.innerHTML = `
+      <div class="bt-summary-loading">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#2563eb" style="animation: btPulse 1.2s infinite;"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+        <span>${isEn ? 'Summarizing content...' : 'সহজ ভাষায় সারসংক্ষেপ তৈরি হচ্ছে...'}</span>
+      </div>
+      <div class="bt-loading-skeleton" style="margin-top: 8px;">
+        <div class="bt-skeleton-line"></div>
+        <div class="bt-skeleton-line"></div>
+        <div class="bt-skeleton-line short"></div>
+      </div>
+    `;
+
+    try {
+      if (window.SummarizerEngine) {
+        currentSummaryData = await window.SummarizerEngine.summarize(
+          originalSelectedText,
+          currentTranslatedText,
+          currentTargetLang
+        );
+      } else {
+        throw new Error('SummarizerEngine not available');
+      }
+
+      if (isShowingSummary) {
+        contentBox.style.animation = 'none';
+        void contentBox.offsetWidth;
+        contentBox.style.animation = 'btFadeIn 0.25s ease';
+        contentBox.innerHTML = currentSummaryData.html;
+      }
+    } catch (err) {
+      console.warn('Summarizer error:', err);
+      if (isShowingSummary) {
+        const fallbackPoints = (window.SummarizerEngine?.smartExtractKeyPoints)
+          ? window.SummarizerEngine.smartExtractKeyPoints(currentTranslatedText, currentTargetLang)
+          : [currentTranslatedText];
+
+        const badgeLabel = isEn ? '💡 Key Takeaways' : '💡 সহজ ভাষায় সারসংক্ষেপ';
+        const html = `
+          <div class="bt-summary-container">
+            <div class="bt-summary-header">
+              <span class="bt-summary-badge">${badgeLabel}</span>
+              <span class="bt-summary-engine">Smart Summary</span>
+            </div>
+            <ul class="bt-summary-list">
+              ${fallbackPoints.map(p => `<li class="bt-summary-item">${p}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+        currentSummaryData = {
+          points: fallbackPoints,
+          html: html,
+          plainText: `${badgeLabel}:\n` + fallbackPoints.map(p => `• ${p}`).join('\n')
+        };
+        contentBox.innerHTML = html;
+      }
     }
   }
 
