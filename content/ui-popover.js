@@ -20,6 +20,26 @@ window.UIPopover = (function () {
   let isShowingSummary = false;
   let currentSummaryData = null;
   let currentFormattedTranslationHtml = '';
+  let isCardExpanded = false;
+
+  /**
+   * Modern View Transitions API (Chrome 111+) runner with graceful fallback.
+   * Enables hardware-accelerated morphing for DOM updates.
+   */
+  function safeViewTransition(updateFn) {
+    if (
+      typeof document.startViewTransition === 'function' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      try {
+        return document.startViewTransition(updateFn);
+      } catch (e) {
+        console.warn('View Transition fallback:', e);
+      }
+    }
+    updateFn();
+    return null;
+  }
 
   const LANGUAGE_NAMES = {
     bn: 'বাংলা',
@@ -193,7 +213,8 @@ window.UIPopover = (function () {
           position: absolute;
           display: none;
           flex-direction: column;
-          width: 460px;
+          width: 480px;
+          min-width: 320px;
           max-width: calc(100vw - 32px);
           background: var(--bt-bg);
           backdrop-filter: blur(14px);
@@ -208,10 +229,18 @@ window.UIPopover = (function () {
           overflow: hidden;
           opacity: 0;
           transform: translateY(12px) scale(0.97);
-          transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+          transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                      max-width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                      opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1),
                       transform 0.26s cubic-bezier(0.16, 1, 0.3, 1),
                       box-shadow 0.2s ease;
-          will-change: transform, opacity;
+          will-change: transform, opacity, width;
+          resize: both;
+        }
+
+        .bt-card.is-expanded {
+          width: min(720px, calc(100vw - 48px));
+          box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25), 0 10px 20px -5px rgba(0, 0, 0, 0.15);
         }
 
         .bt-card.bt-visible {
@@ -275,6 +304,12 @@ window.UIPopover = (function () {
           font-weight: 500;
         }
 
+        .bt-header-right {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
         .bt-engine-badge {
           display: inline-flex;
           align-items: center;
@@ -292,17 +327,26 @@ window.UIPopover = (function () {
           color: var(--bt-accent);
         }
 
+        .bt-icon-btn,
         .bt-close-btn {
           background: transparent;
           border: none;
           color: var(--bt-text-muted);
           cursor: pointer;
-          font-size: 14px;
-          padding: 2px 4px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 3px 5px;
           border-radius: 4px;
           line-height: 1;
+          transition: color 0.15s, background 0.15s;
         }
 
+        .bt-close-btn {
+          font-size: 14px;
+        }
+
+        .bt-icon-btn:hover,
         .bt-close-btn:hover {
           color: var(--bt-text);
           background: rgba(0, 0, 0, 0.06);
@@ -327,13 +371,22 @@ window.UIPopover = (function () {
         /* Content Area */
         .bt-body {
           padding: 12px 14px;
-          max-height: 360px;
+          max-height: min(520px, 68vh);
           overflow-y: auto;
           font-size: 13.5px;
           line-height: 1.65;
           letter-spacing: 0.1px;
           word-break: break-word;
           white-space: normal;
+          transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                      padding 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .bt-card.is-expanded .bt-body {
+          max-height: min(650px, 78vh);
+          font-size: 14px;
+          line-height: 1.75;
+          padding: 16px 18px;
         }
 
         .bt-para {
@@ -431,6 +484,24 @@ window.UIPopover = (function () {
           0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
           70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
           100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .bt-tool-btn.has-long-content {
+          border-color: rgba(37, 99, 235, 0.4);
+          position: relative;
+        }
+
+        .bt-tool-btn.has-long-content::after {
+          content: '';
+          position: absolute;
+          top: -2px;
+          right: -2px;
+          width: 6px;
+          height: 6px;
+          background: var(--bt-accent);
+          border-radius: 50%;
+          box-shadow: 0 0 0 1.5px var(--bt-bg);
+          animation: btPulse 2s infinite;
         }
 
         .bt-tool-btn svg {
@@ -553,7 +624,17 @@ window.UIPopover = (function () {
             <span id="bt-lang-direction">English ➔ বাংলা</span>
             <span class="bt-engine-badge" id="bt-engine">⚡ AI</span>
           </div>
-          <button class="bt-close-btn" id="bt-close" title="বন্ধ করুন">✕</button>
+          <div class="bt-header-right">
+            <button class="bt-icon-btn" id="bt-expand" title="বড় করে পড়ুন (Expand reading view)">
+              <svg id="bt-expand-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            </button>
+            <button class="bt-close-btn" id="bt-close" title="বন্ধ করুন">✕</button>
+          </div>
         </div>
 
         <div class="bt-progress-container" id="bt-progress-box">
@@ -626,6 +707,15 @@ window.UIPopover = (function () {
       }
     });
 
+    // Expand / Restore button click
+    const expandBtn = shadowRoot.getElementById('bt-expand');
+    if (expandBtn) {
+      expandBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleExpand();
+      });
+    }
+
     // Close button click
     shadowRoot.getElementById('bt-close').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -685,8 +775,8 @@ window.UIPopover = (function () {
     if (!headerEl || !cardEl) return;
 
     headerEl.addEventListener('mousedown', (e) => {
-      // Don't drag if clicking close button or not primary mouse button
-      if (e.button !== 0 || e.target.closest('#bt-close')) return;
+      // Don't drag if clicking buttons or not primary mouse button
+      if (e.button !== 0 || e.target.closest('#bt-close') || e.target.closest('#bt-expand')) return;
 
       isDraggingCard = true;
       cardEl.classList.add('is-dragging');
@@ -1319,12 +1409,39 @@ window.UIPopover = (function () {
     currentSummaryData = null;
     currentFormattedTranslationHtml = '';
 
+    // Reset card expanded state
+    isCardExpanded = false;
+    if (cardEl) {
+      cardEl.classList.remove('is-expanded');
+    }
+    const expandBtn = shadowRoot.getElementById('bt-expand');
+    if (expandBtn) {
+      const isBn = currentTargetLang === 'bn';
+      expandBtn.title = isBn ? 'বড় করে পড়ুন (Expand reading view)' : 'Expand reading view';
+      expandBtn.innerHTML = `
+        <svg id="bt-expand-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line>
+          <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      `;
+    }
+
     const sumBtn = shadowRoot.getElementById('bt-summarize');
     if (sumBtn) {
       sumBtn.classList.remove('active');
       const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
       if (sumSpan) sumSpan.textContent = i18n.summary;
       sumBtn.title = i18n.summary;
+
+      // Pulse callout when selection contains significant text (> 80 words)
+      const wordCount = (text || '').trim().split(/\s+/).filter(Boolean).length;
+      if (wordCount >= 80) {
+        sumBtn.classList.add('has-long-content');
+      } else {
+        sumBtn.classList.remove('has-long-content');
+      }
     }
 
     hideTrigger(true); // immediately hide trigger
@@ -1355,6 +1472,9 @@ window.UIPopover = (function () {
     stopAudio();
     clearTimeout(cardHideTimer);
 
+    isCardExpanded = false;
+    cardEl.classList.remove('is-expanded');
+
     if (immediate) {
       cardEl.classList.remove('bt-visible', 'bt-hiding');
       cardEl.style.display = 'none';
@@ -1370,31 +1490,97 @@ window.UIPopover = (function () {
   }
 
   /**
+   * Toggles the card between standard and expanded reading view for long articles.
+   */
+  function toggleExpand() {
+    if (!cardEl) return;
+    isCardExpanded = !isCardExpanded;
+
+    const expandBtn = shadowRoot.getElementById('bt-expand');
+    const isBn = currentTargetLang === 'bn';
+
+    safeViewTransition(() => {
+      if (isCardExpanded) {
+        cardEl.classList.add('is-expanded');
+        if (expandBtn) {
+          expandBtn.title = isBn ? 'স্বাভাবিক আকারে ফিরুন (Restore normal view)' : 'Restore normal view';
+          expandBtn.innerHTML = `
+            <svg id="bt-expand-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 14 10 14 10 20"></polyline>
+              <polyline points="20 10 14 10 14 4"></polyline>
+              <line x1="14" y1="10" x2="21" y2="3"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          `;
+        }
+      } else {
+        cardEl.classList.remove('is-expanded');
+        if (expandBtn) {
+          expandBtn.title = isBn ? 'বড় করে পড়ুন (Expand reading view)' : 'Expand reading view';
+          expandBtn.innerHTML = `
+            <svg id="bt-expand-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <polyline points="9 21 3 21 3 15"></polyline>
+              <line x1="21" y1="3" x2="14" y2="10"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          `;
+        }
+      }
+
+      // Re-position card if needed
+      if (activeSelectionRange) {
+        positionCard(activeSelectionRange);
+      }
+    });
+  }
+
+  /**
    * Calculates smart coordinates preventing the card from overflowing the viewport.
+   * Handles tall multi-paragraph article selections gracefully.
    */
   function positionCard(selectionRange) {
-    if (!selectionRange) return;
+    if (!selectionRange || !cardEl) return;
     const rect = selectionRange.getBoundingClientRect();
 
-    const cardWidth = 460;
-    const cardEstHeight = 260;
+    const cardWidth = isCardExpanded
+      ? Math.min(720, window.innerWidth - 48)
+      : Math.min(480, window.innerWidth - 32);
+    const cardEstHeight = isCardExpanded ? 420 : 260;
     const padding = 12;
 
-    let left = window.scrollX + rect.left;
-    // Align centered with selection if possible
-    left = window.scrollX + rect.left + rect.width / 2 - cardWidth / 2;
-
-    // Viewport bounds checking horizontally
     const minLeft = window.scrollX + padding;
     const maxLeft = window.scrollX + document.documentElement.clientWidth - cardWidth - padding;
-    left = Math.max(minLeft, Math.min(left, maxLeft));
 
-    // Place below selection by default, or above if there's no room below
+    let left = window.scrollX + rect.left + rect.width / 2 - cardWidth / 2;
     let top = window.scrollY + rect.bottom + 8;
-    const spaceBelow = window.innerHeight - rect.bottom;
-    if (spaceBelow < cardEstHeight + 20 && rect.top > cardEstHeight + 20) {
-      top = window.scrollY + rect.top - cardEstHeight - 8;
+
+    // Detect tall multi-paragraph selections (e.g. full news articles or essays)
+    const isTallSelection = rect.height > 240;
+
+    if (isTallSelection) {
+      // Check if there is enough space on the right side of the selection to dock
+      const spaceRight = window.innerWidth - rect.right;
+      if (spaceRight >= cardWidth + 24) {
+        left = window.scrollX + rect.right + 12;
+      } else {
+        // Center within visible screen
+        left = window.scrollX + (window.innerWidth - cardWidth) / 2;
+      }
+
+      // Clamp vertical position to visible viewport so user doesn't have to scroll down 800px
+      const viewportTop = Math.max(rect.top, 24);
+      const maxViewportTop = Math.max(24, window.innerHeight - cardEstHeight - 32);
+      top = window.scrollY + Math.min(viewportTop, maxViewportTop);
+    } else {
+      // Standard selection positioning
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < cardEstHeight + 20 && rect.top > cardEstHeight + 20) {
+        top = window.scrollY + rect.top - cardEstHeight - 8;
+      }
     }
+
+    left = Math.max(minLeft, Math.min(left, maxLeft));
 
     cardEl.style.left = `${left}px`;
     cardEl.style.top = `${top}px`;
@@ -1602,10 +1788,12 @@ window.UIPopover = (function () {
         if (sumSpan) sumSpan.textContent = i18n.summary;
         sumBtn.title = i18n.summary;
       }
-      contentBox.style.animation = 'none';
-      void contentBox.offsetWidth;
-      contentBox.style.animation = 'btFadeIn 0.2s ease';
-      contentBox.innerHTML = currentFormattedTranslationHtml || currentTranslatedText;
+      safeViewTransition(() => {
+        contentBox.style.animation = 'none';
+        void contentBox.offsetWidth;
+        contentBox.style.animation = 'btFadeIn 0.2s ease';
+        contentBox.innerHTML = currentFormattedTranslationHtml || currentTranslatedText;
+      });
       return;
     }
 
@@ -1622,10 +1810,12 @@ window.UIPopover = (function () {
 
     // If already generated for this active selection, render instantly
     if (currentSummaryData && currentSummaryData.html) {
-      contentBox.style.animation = 'none';
-      void contentBox.offsetWidth;
-      contentBox.style.animation = 'btFadeIn 0.2s ease';
-      contentBox.innerHTML = currentSummaryData.html;
+      safeViewTransition(() => {
+        contentBox.style.animation = 'none';
+        void contentBox.offsetWidth;
+        contentBox.style.animation = 'btFadeIn 0.2s ease';
+        contentBox.innerHTML = currentSummaryData.html;
+      });
       return;
     }
 
@@ -1654,10 +1844,12 @@ window.UIPopover = (function () {
       }
 
       if (isShowingSummary) {
-        contentBox.style.animation = 'none';
-        void contentBox.offsetWidth;
-        contentBox.style.animation = 'btFadeIn 0.25s ease';
-        contentBox.innerHTML = currentSummaryData.html;
+        safeViewTransition(() => {
+          contentBox.style.animation = 'none';
+          void contentBox.offsetWidth;
+          contentBox.style.animation = 'btFadeIn 0.25s ease';
+          contentBox.innerHTML = currentSummaryData.html;
+        });
       }
     } catch (err) {
       console.warn('Summarizer error:', err);
@@ -1674,7 +1866,9 @@ window.UIPopover = (function () {
           html: html,
           plainText: `${badgeLabel}:\n` + fallbackPoints.map(p => `• ${p}`).join('\n')
         };
-        contentBox.innerHTML = html;
+        safeViewTransition(() => {
+          contentBox.innerHTML = html;
+        });
       }
     }
   }
