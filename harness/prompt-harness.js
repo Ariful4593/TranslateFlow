@@ -174,8 +174,138 @@
     }
   };
 
-  function getI18nLabels(lang = 'bn') {
-    return I18N_LABELS[lang] || I18N_LABELS.en;
+  // Contextual Takeaway Configurations: Adapt prefixes and badges to content domain
+  const CONTEXTUAL_CONFIG = {
+    tech: {
+      bn: {
+        badge: '💡 সহজ ভাষায় সারসংক্ষেপ',
+        prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: ']
+      },
+      hi: {
+        badge: '💡 मुख्य बातें (सरल सारांश)',
+        prefixes: ['🎯 मुख्य विषय: ', '⚙️ यह कैसे काम करता है: ', '💡 व्यावहारिक लाभ: ']
+      },
+      en: {
+        badge: '💡 Key Takeaways',
+        prefixes: ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: ']
+      },
+      es: {
+        badge: '💡 Puntos Clave',
+        prefixes: ['🎯 Concepto Clave: ', '⚙️ Cómo funciona: ', '💡 Beneficio Práctico: ']
+      }
+    },
+    news: {
+      bn: {
+        badge: '📰 সংবাদের মূল সারসংক্ষেপ',
+        prefixes: ['📌 মূল সংবাদ: ', '💬 কী বলা হয়েছে: ', '📋 মূল সিদ্ধান্ত বা প্রভাব: ']
+      },
+      hi: {
+        badge: '📰 मुख्य समाचार सारांश',
+        prefixes: ['📌 मुख्य समाचार: ', '💬 क्या कहा गया: ', '📋 मुख्य निर्णय / प्रभाव: ']
+      },
+      en: {
+        badge: '📰 News Takeaways',
+        prefixes: ['📌 Key Event: ', '💬 What was said: ', '📋 Decision & Impact: ']
+      },
+      es: {
+        badge: '📰 Resumen de Noticias',
+        prefixes: ['📌 Noticia Principal: ', '💬 Declaraciones: ', '📋 Decisión e Impacto: ']
+      }
+    },
+    general: {
+      bn: {
+        badge: '💡 মূল সারসংক্ষেপ',
+        prefixes: ['📌 মূল কথা: ', '💡 গুরুত্বপূর্ণ দিক: ', '🔍 বিস্তারিত: ']
+      },
+      hi: {
+        badge: '💡 मुख्य बातें',
+        prefixes: ['📌 मुख्य बात: ', '💡 महत्वपूर्ण पहलू: ', '🔍 मुख्य विवरण: ']
+      },
+      en: {
+        badge: '💡 Key Summary',
+        prefixes: ['📌 Main Point: ', '💡 Key Aspect: ', '🔍 Notable Details: ']
+      },
+      es: {
+        badge: '💡 Resumen Principal',
+        prefixes: ['📌 Punto Principal: ', '💡 Aspecto Relevante: ', '🔍 Detalles: ']
+      }
+    }
+  };
+
+  /**
+   * Intelligently classifies text domain into 'tech', 'news', or 'general'
+   * based on terminology and lexical patterns.
+   * @param {string} text
+   * @returns {'tech'|'news'|'general'}
+   */
+  function detectContext(text) {
+    if (!text || typeof text !== 'string') return 'general';
+    const lower = text.toLowerCase();
+
+    // 1. News, current affairs, politics, government, incidents, transport
+    const newsKeywords = [
+      'minister', 'ministry', 'police', 'court', 'government', 'parliament',
+      'president', 'official', 'officials', 'spokesperson', 'spokesman',
+      'meeting', 'auditorium', 'protest', 'strike', 'election', 'cabinet',
+      'authorities', 'investigation', 'accident', 'killed', 'injured', 'death',
+      'bus owners', 'bus routes', 'buses', 'traffic', 'dhaka', 'bangladesh',
+      'daily star', 'announced', 'called on', 'said at a', 'press release',
+      'press conference', 'highway', 'passengers', 'hospital', 'arrested',
+      'fir', 'judge', 'order', 'tribunal', 'rally', 'summit',
+      'মালিক', 'বাস', 'রুট', 'মন্ত্রী', 'সরকার', 'পুলিশ', 'আদালত', 'বৈঠক',
+      'ঘোষণা', 'আহ্বান', 'তেজগাঁও', 'অডিটোরিয়াম', 'নিহত', 'আহত', 'সংসদ',
+      'নির্বাচন', 'কর্মকর্তা', 'দুর্ঘটনা', 'হাসপাতাল', 'গ্রেফতার', 'বক্তব্য',
+      'সংবাদ', 'যানবাহন', 'যাত্রী', 'আন্দোলন', 'ধর্মঘট'
+    ];
+
+    // 2. Tech, programming, software architecture, code, API, data science
+    const techKeywords = [
+      'react', 'javascript', 'typescript', 'python', 'node', 'component',
+      'components', 'function', 'class', 'method', 'props', 'state', 'render',
+      'rendering', 'api', 'sdk', 'cli', 'dom', 'audiocontext', 'suspense',
+      'streaming', 'compiler', 'bundler', 'frontend', 'backend', 'framework',
+      'library', 'database', 'sql', 'nosql', 'query', 'mutation', 'async',
+      'await', 'cache', 'caching', 'server-side', 'client-side', 'html',
+      'css', 'json', 'endpoint', 'algorithm', 'git', 'github', 'docker',
+      'cloud', 'variable', 'module', 'import', 'export', 'hook', 'hooks',
+      'router', 'route', 'full-stack', 'web application', 'ui', 'ux',
+      'কিলোবাইট', 'ফাংশন', 'কম্পোনেন্ট', 'এপিআই', 'রেন্ডার', 'সার্ভার',
+      'ক্লায়েন্ট', 'কোড', 'সফটওয়্যার', 'ডেটাবেস', 'ফ্রেমওয়ার্ক', 'লাইব্রেরি',
+      'লজিক', 'প্রোগ্রামিং'
+    ];
+
+    let newsScore = 0;
+    for (const kw of newsKeywords) {
+      if (lower.includes(kw)) {
+        newsScore += (kw.includes(' ') ? 2 : 1);
+      }
+    }
+
+    let techScore = 0;
+    for (const kw of techKeywords) {
+      if (lower.includes(kw)) {
+        techScore += (kw.includes(' ') ? 2 : 1);
+      }
+    }
+
+    if (techScore > newsScore && techScore >= 1) return 'tech';
+    if (newsScore > techScore && newsScore >= 1) return 'news';
+    if (techScore >= 1) return 'tech';
+    if (newsScore >= 1) return 'news';
+
+    return 'general';
+  }
+
+  function getI18nLabels(lang = 'bn', context = 'tech') {
+    const base = I18N_LABELS[lang] || I18N_LABELS.en;
+    const ctx = (context && CONTEXTUAL_CONFIG[context]) ? context : 'tech';
+    const ctxLangConfig = (CONTEXTUAL_CONFIG[ctx] && (CONTEXTUAL_CONFIG[ctx][lang] || CONTEXTUAL_CONFIG[ctx].en)) || {};
+
+    return {
+      ...base,
+      badge: ctxLangConfig.badge || base.badge,
+      prefixes: ctxLangConfig.prefixes || base.prefixes
+    };
   }
 
   // Core LWS Persona & Quality Principles per language
@@ -220,19 +350,42 @@
    * Generates a context-aware system prompt for Chrome Built-in LanguageModel / Summarizer.
    * @param {string} [targetLang='bn']
    * @param {'translation'|'summarization'} [taskType='summarization']
+   * @param {'tech'|'news'|'general'} [context='tech']
    * @returns {string}
    */
-  function buildSystemPrompt(targetLang = 'bn', taskType = 'summarization') {
-    const directives = LWS_SYSTEM_DIRECTIVES[targetLang] || LWS_SYSTEM_DIRECTIVES.en;
-    let basePrompt = directives.join(' ');
+  function buildSystemPrompt(targetLang = 'bn', taskType = 'summarization', context = 'tech') {
+    const ctx = CONTEXTUAL_CONFIG[context] ? context : 'tech';
+    const i18n = getI18nLabels(targetLang, ctx);
 
     if (taskType === 'summarization') {
-      const i18n = getI18nLabels(targetLang);
+      if (ctx === 'news') {
+        if (targetLang === 'bn') {
+          return `আপনি সংবাদ প্রতিবেদন ও সাম্প্রতিক ঘটনার তথ্য অত্যন্ত সহজ ও প্রাঞ্জল বাংলায় উপস্থাপন করেন। খবরটির মূল ঘটনা, বক্তব্য ও ফলাফল ২ থেকে ৩টি স্পষ্ট পয়েন্টে (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}) সাজিয়ে দিন। কোনো ভুল বা বিভ্রান্তিকর টেকনিক্যাল শব্দ (যেমন 'কীভাবে কাজ করে') ব্যবহার করবেন না। শুধু পয়েন্টগুলো লিখুন।`;
+        }
+        if (targetLang === 'hi') {
+          return `आप समाचार और घटनाओं को सरल व स्पष्ट हिंदी में 2 से 3 बिंदुओं (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}) में संक्षेप करते हैं। अप्रासंगिक तकनीकी शब्द प्रयोग न करें।`;
+        }
+        return `Summarize news and current events clearly and factually into 2 to 3 points (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}). Output only bullet points.`;
+      }
+
+      if (ctx === 'general') {
+        if (targetLang === 'bn') {
+          return `আপনি যেকোনো লেখার মূল ভাব ও গুরুত্বপূর্ণ বিষয়গুলো সহজ বাংলায় ২ থেকে ৩টি পয়েন্টে (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}) তুলে ধরেন। শুধু বুলেট পয়েন্ট লিখুন।`;
+        }
+        return `Summarize the content into 2 to 3 clear, concise takeaways (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}). Output only bullet points.`;
+      }
+
+      // Default: tech (LWS Style)
+      const directives = LWS_SYSTEM_DIRECTIVES[targetLang] || LWS_SYSTEM_DIRECTIVES.en;
+      let basePrompt = directives.join(' ');
       basePrompt += ` Output exactly 2 to 3 concise bullet points with the appropriate icons (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}). Output only bullet points without conversational filler.`;
-    } else {
-      basePrompt += ' Translate clearly, naturally, and developer-friendly. Preserve code and technical keywords in English.';
+      return basePrompt;
     }
 
+    // Translation task
+    const directives = LWS_SYSTEM_DIRECTIVES[targetLang] || LWS_SYSTEM_DIRECTIVES.en;
+    let basePrompt = directives.join(' ');
+    basePrompt += ' Translate clearly, naturally, and developer-friendly. Preserve code and technical keywords in English.';
     return basePrompt;
   }
 
@@ -240,11 +393,23 @@
    * Builds an instruction prompt with few-shot guidance if needed.
    * @param {string} text
    * @param {string} [targetLang='bn']
+   * @param {'tech'|'news'|'general'} [context=null]
    * @returns {string}
    */
-  function buildUserPrompt(text, targetLang = 'bn') {
-    const i18n = getI18nLabels(targetLang);
+  function buildUserPrompt(text, targetLang = 'bn', context = null) {
+    const ctx = context || detectContext(text);
+    const i18n = getI18nLabels(targetLang, ctx);
     const markers = i18n.prefixes.map((p) => p.replace(/:\s*$/, '')).join(', ');
+
+    if (ctx === 'news') {
+      if (targetLang === 'bn') {
+        return `নিচের সংবাদ প্রতিবেদনটি সহজ ভাষায় সংবাদের মূল বিষয় অনুযায়ী পয়েন্টে (${markers}) সারসংক্ষেপ করে দিন:\n\n${text}`;
+      }
+      if (targetLang === 'hi') {
+        return `निम्नलिखित समाचार को स्पष्ट बिंदुओं (${markers}) में संक्षेप करें:\n\n${text}`;
+      }
+      return `Summarize this news article into clear takeaways (${markers}):\n\n${text}`;
+    }
 
     if (targetLang === 'bn') {
       return `নিচের টেকনিক্যাল ডকুমেন্টেশনটি সুমিত সাহা (LWS) স্টাইলে ৩টি সহজ পয়েন্টে (${markers}) সারসংক্ষেপ করে দিন:\n\n${text}`;
@@ -265,8 +430,10 @@
   return {
     buildSystemPrompt,
     buildUserPrompt,
+    detectContext,
     getFewShotExemplars,
     getI18nLabels,
+    CONTEXTUAL_CONFIG,
     I18N_LABELS,
     LWS_SYSTEM_DIRECTIVES
   };

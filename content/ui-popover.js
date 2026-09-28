@@ -578,16 +578,27 @@ window.UIPopover = (function () {
 
         .bt-summary-list {
           margin: 0 !important;
-          padding: 0 0 0 16px !important;
-          list-style-type: disc !important;
+          padding: 0 !important;
+          list-style: none !important;
         }
 
         .bt-summary-item {
-          margin: 0 0 6px 0 !important;
-          padding: 0 !important;
-          line-height: 1.55 !important;
+          margin: 0 0 8px 0 !important;
+          padding: 2px 0 !important;
+          line-height: 1.65 !important;
           font-size: 13.5px;
           white-space: normal !important;
+        }
+
+        .bt-summary-prefix {
+          font-weight: 600;
+          color: var(--bt-text);
+          display: inline;
+        }
+
+        .bt-summary-text {
+          color: var(--bt-text);
+          display: inline;
         }
 
         .bt-summary-item:last-child {
@@ -1858,8 +1869,23 @@ window.UIPopover = (function () {
           ? window.SummarizerEngine.smartExtractKeyPoints(currentTranslatedText, currentTargetLang)
           : [currentTranslatedText];
 
-        const badgeLabel = i18n.badge;
-        const items = fallbackPoints.map((p) => `<li class="bt-summary-item">${p}</li>`).join('');
+        const context = window.PromptHarness?.detectContext
+          ? window.PromptHarness.detectContext(currentTranslatedText || originalSelectedText)
+          : 'tech';
+        const ctxI18n = window.PromptHarness?.getI18nLabels
+          ? window.PromptHarness.getI18nLabels(currentTargetLang, context)
+          : i18n;
+        const badgeLabel = ctxI18n.badge || i18n.badge;
+
+        const items = fallbackPoints.map((p) => {
+          const cleanPt = p.replace(/^[-*•#\d.]+\s*/, '').trim();
+          const match = cleanPt.match(/^((?:[^\s:]+[\s:]){1,3}[^:]+:)\s*(.*)$/);
+          if (match) {
+            return `<li class="bt-summary-item"><strong class="bt-summary-prefix">${match[1]}</strong> <span class="bt-summary-text">${match[2]}</span></li>`;
+          }
+          return `<li class="bt-summary-item"><span class="bt-summary-text">${cleanPt}</span></li>`;
+        }).join('');
+
         const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">Smart Summary</span></div><ul class="bt-summary-list">${items}</ul></div>`.trim();
         currentSummaryData = {
           points: fallbackPoints,

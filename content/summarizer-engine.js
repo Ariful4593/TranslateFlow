@@ -121,21 +121,26 @@ window.SummarizerEngine = (function () {
       if (candidates.length >= 3) break;
     }
 
+    // Detect domain context (tech, news, general)
+    const context = window.PromptHarness?.detectContext
+      ? window.PromptHarness.detectContext(processedText)
+      : 'tech';
+
     const pointsList = candidates.length > 0 ? candidates : rawSentences.slice(0, 2);
 
-    // Apply structured conceptual prefixes according to target language
+    // Apply context-aware structured prefixes according to target language
     const i18n = window.PromptHarness?.getI18nLabels
-      ? window.PromptHarness.getI18nLabels(lang)
+      ? window.PromptHarness.getI18nLabels(lang, context)
       : (lang === 'bn'
-          ? { prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: '] }
-          : (lang === 'hi'
-              ? { prefixes: ['🎯 मुख्य विषय: ', '⚙️ यह कैसे काम करता है: ', '💡 व्यावहारिक लाभ: '] }
-              : { prefixes: ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: '] }));
-    const prefixes = i18n.prefixes || ['🎯 ', '⚙️ ', '💡 '];
+          ? (context === 'news'
+              ? { prefixes: ['📌 মূল সংবাদ: ', '💬 কী বলা হয়েছে: ', '📋 মূল সিদ্ধান্ত বা প্রভাব: '] }
+              : { prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: '] })
+          : { prefixes: ['📌 Key Event: ', '💬 What was said: ', '📋 Impact: '] });
+    const prefixes = i18n.prefixes || ['📌 ', '💬 ', '📋 '];
 
     return pointsList.map((pt, idx) => {
       const cleanPt = pt.replace(/^[-*•#\d.]+\s*/, '').trim();
-      if (/^(🎯|⚙️|💡)/.test(cleanPt)) return cleanPt;
+      if (/^(🎯|⚙️|💡|📌|💬|📋|🔹)/.test(cleanPt)) return cleanPt;
       const prefix = prefixes[idx] || (lang === 'bn' ? '• ' : '• ');
       return `${prefix}${cleanPt}`;
     });
@@ -155,6 +160,11 @@ window.SummarizerEngine = (function () {
   async function summarize(sourceText, translatedText, targetLang = 'bn') {
     const isEn = targetLang === 'en';
     const textToProcess = sourceText || translatedText || '';
+
+    // Detect domain context (tech, news, general)
+    const context = window.PromptHarness?.detectContext
+      ? window.PromptHarness.detectContext(textToProcess)
+      : 'tech';
 
     // Attempt 1: Chrome Built-in Summarizer API
     try {
@@ -199,7 +209,7 @@ window.SummarizerEngine = (function () {
           }
 
           if (lines.length > 0) {
-            return formatResult(lines, 'Chrome AI Summarizer', targetLang);
+            return formatResult(lines, 'Chrome AI Summarizer', targetLang, context);
           }
         }
       }
@@ -211,17 +221,17 @@ window.SummarizerEngine = (function () {
     try {
       if (typeof window.ai !== 'undefined' && typeof window.ai.languageModel?.create === 'function') {
         const systemPrompt = window.PromptHarness?.buildSystemPrompt
-          ? window.PromptHarness.buildSystemPrompt(targetLang, 'summarization')
+          ? window.PromptHarness.buildSystemPrompt(targetLang, 'summarization', context)
           : (isEn
-              ? 'You are a master technical educator explaining concepts with utmost simplicity, intuition, and real-world clarity. Summarize into 2-3 structured takeaways (1. Core Concept in 1 line, 2. How it works, 3. Practical intuition). Keep all technical terms, code, and API names intact. Output only bullet points.'
-              : 'আপনি সুমিত সাহা (Learn with Sumit)-এর মতো অত্যন্ত সহজে, প্রাঞ্জল ও বন্ধুত্বপূর্ণ ভাষায় প্রোগ্রামিং কনসেপ্ট বুঝিয়ে দেন। টেক্সটটিকে ৩টি পয়েন্টে বুঝিয়ে দিন: 🎯 মূল বিষয় (সহজ কথায় ১ লাইনে), ⚙️ কীভাবে কাজ করে, 💡 বাস্তব সুবিধা। সব টেকনিক্যাল টার্ম ও API নাম ইংরেজিতেই অক্ষত রাখুন। সরাসরি ৩টি বুলেট পয়েন্ট লিখুন।');
+              ? 'You are a master educator explaining concepts with utmost simplicity, intuition, and real-world clarity. Summarize into 2-3 structured takeaways. Keep all key terms intact. Output only bullet points.'
+              : 'টেক্সটটিকে সহজ ও প্রাঞ্জল ভাষায় ২ থেকে ৩টি পয়েন্টে সারসংক্ষেপ করে দিন। সরাসরি বুলেট পয়েন্ট লিখুন।');
 
         const session = await window.ai.languageModel.create({
           systemPrompt: systemPrompt
         });
 
         const promptText = window.PromptHarness?.buildUserPrompt
-          ? window.PromptHarness.buildUserPrompt(textToProcess, targetLang)
+          ? window.PromptHarness.buildUserPrompt(textToProcess, targetLang, context)
           : `Summarize this text:\n\n${textToProcess}`;
         const modelOutput = await Promise.race([
           session.prompt(promptText),
@@ -235,7 +245,7 @@ window.SummarizerEngine = (function () {
             .filter((l) => l.length > 5);
 
           if (lines.length > 0) {
-            return formatResult(lines, 'Chrome AI Model', targetLang);
+            return formatResult(lines, 'Chrome AI Model', targetLang, context);
           }
         }
       }
@@ -246,24 +256,32 @@ window.SummarizerEngine = (function () {
     // Attempt 3: High-speed Smart Linguistic Extraction (Guaranteed, Instant, Zero-Failure)
     const baseText = translatedText || sourceText;
     const extractedPoints = smartExtractKeyPoints(baseText, targetLang);
-    return formatResult(extractedPoints, 'Smart Engine', targetLang);
+    return formatResult(extractedPoints, 'Smart Engine', targetLang, context);
   }
 
   /**
    * Formats bullet points into clean, accessible HTML and plain text with zero extra whitespace.
    */
-  function formatResult(points, engine, targetLang) {
+  function formatResult(points, engine, targetLang, context = 'tech') {
     const i18n = window.PromptHarness?.getI18nLabels
-      ? window.PromptHarness.getI18nLabels(targetLang)
+      ? window.PromptHarness.getI18nLabels(targetLang, context)
       : (targetLang === 'bn'
-          ? { badge: '💡 সহজ ভাষায় সারসংক্ষেপ' }
+          ? (context === 'news' ? { badge: '📰 সংবাদের মূল সারসংক্ষেপ' } : { badge: '💡 সহজ ভাষায় সারসংক্ষেপ' })
           : (targetLang === 'hi'
-              ? { badge: '💡 मुख्य बातें (सरल सारांश)' }
+              ? (context === 'news' ? { badge: '📰 मुख्य समाचार सारांश' } : { badge: '💡 मुख्य बातें (सरल सारांश)' })
               : { badge: '💡 Key Takeaways' }));
     const badgeLabel = i18n.badge || '💡 Key Takeaways';
 
     const itemsHtml = points
-      .map((p) => `<li class="bt-summary-item">${escapeHtml(p)}</li>`)
+      .map((p) => {
+        const cleanPt = p.replace(/^[-*•#\d.]+\s*/, '').trim();
+        const escaped = escapeHtml(cleanPt);
+        const match = escaped.match(/^((?:[^\s:]+[\s:]){1,3}[^:]+:)\s*(.*)$/);
+        if (match) {
+          return `<li class="bt-summary-item"><strong class="bt-summary-prefix">${match[1]}</strong> <span class="bt-summary-text">${match[2]}</span></li>`;
+        }
+        return `<li class="bt-summary-item"><span class="bt-summary-text">${escaped}</span></li>`;
+      })
       .join('');
 
     const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">${engine}</span></div><ul class="bt-summary-list">${itemsHtml}</ul></div>`.trim();

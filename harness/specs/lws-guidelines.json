@@ -63,26 +63,32 @@
     "Server Component", "Client Component", "hydration", "accessibility"
   ],
   "summaryLayout": {
-    "type": "three_tier_pedagogical",
-    "tiers": [
-      {
-        "id": "core_concept",
-        "label": "🎯 মূল বিষয়",
-        "enLabel": "🎯 Core Concept",
-        "description": "সহজ কথায় ১ লাইনে মূল আইডিয়া বা কনসেপ্টটা আসলে কী"
+    "type": "context_aware_takeaways",
+    "contexts": {
+      "tech": {
+        "description": "Used for code, programming documentation, API references, architecture",
+        "tiers": [
+          { "id": "core_concept", "label": "🎯 মূল বিষয়", "enLabel": "🎯 Core Concept", "description": "সহজ কথায় ১ লাইনে মূল কনসেপ্ট" },
+          { "id": "mechanism", "label": "⚙️ কীভাবে কাজ করে", "enLabel": "⚙️ How it works", "description": "আন্ডার-দ্য-হুড টেকনিক্যাল মেকানিজম" },
+          { "id": "practical_value", "label": "💡 বাস্তব সুবিধা", "enLabel": "💡 Practical Benefit", "description": "ব্যবহারের উপকারিতা বা টিপস" }
+        ]
       },
-      {
-        "id": "mechanism",
-        "label": "⚙️ কীভাবে কাজ করে",
-        "enLabel": "⚙️ How it works",
-        "description": "টেকনিক্যালি প্রসেসটি আন্ডার-দ্য-হুড কীভাবে সম্পন্ন হচ্ছে"
+      "news": {
+        "description": "Used for journalism, politics, accidents, government decisions, public transport, daily reports",
+        "tiers": [
+          { "id": "main_event", "label": "📌 মূল সংবাদ", "enLabel": "📌 Key Event", "description": "কী ঘটেছে বা প্রধান খবরটি কী" },
+          { "id": "statement", "label": "💬 কী বলা হয়েছে", "enLabel": "💬 What was said", "description": "বক্তা বা কর্তৃপক্ষের বক্তব্য ও ঘোষণা" },
+          { "id": "outcome_timeline", "label": "📋 মূল সিদ্ধান্ত বা প্রভাব", "enLabel": "📋 Decision & Impact", "description": "ফলাফল, সময়সীমা বা পরবর্তী পদক্ষেপ" }
+        ]
       },
-      {
-        "id": "practical_value",
-        "label": "💡 বাস্তব সুবিধা",
-        "enLabel": "💡 Practical Benefit",
-        "description": "বাস্তব ক্ষেত্রে এর সুবিধা কী বা কেন এভাবে কোড করা হয়"
+      "general": {
+        "description": "Used for general essays, stories, editorials, and non-technical articles",
+        "tiers": [
+          { "id": "main_point", "label": "📌 মূল কথা", "enLabel": "📌 Main Point", "description": "লেখার প্রধান বক্তব্য" },
+          { "id": "key_aspect", "label": "💡 গুরুত্বপূর্ণ দিক", "enLabel": "💡 Key Aspect", "description": "বিশেষ বিবেচ্য বিষয়" },
+          { "id": "details", "label": "🔍 বিস্তারিত", "enLabel": "🔍 Details", "description": "তাৎপর্য ও বিস্তারিত তথ্য" }
+        ]
       }
-    ]
+    }
   }
 }

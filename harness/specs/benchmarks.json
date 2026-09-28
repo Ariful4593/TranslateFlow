@@ -34,5 +34,14 @@
     "requiredTerms": ["React", "components"],
     "forbiddenSubstrings": ["মূল বিষয়", "কীভাবে কাজ করে", "বাস্তব সুবিধা", "সহজ ভাষায়"],
     "expectedSummaryMarkers": ["🎯 मुख्य विषय", "⚙️ यह कैसे काम करता है", "💡 व्यावहारिक लाभ"]
+  },
+  {
+    "id": "dhaka-bus-news-context",
+    "name": "Daily Star News Report (Contextual Evaluation)",
+    "sourceText": "Transport Minister Shaikh Rabiul Alam today called on Dhaka's bus owners to bring discipline in the city's bus routes, with designated stops, standardised buses and better control over drivers and helpers. If the bus owners want and start from today, at least 50 percent of Dhaka's buses will come under discipline, and within three months there will be an overall change, he said at a meeting with bus owners at the Roads Building auditorium in Tejgaon.",
+    "targetLanguage": "bn",
+    "requiredTerms": ["বাস", "মালিক"],
+    "forbiddenSubstrings": ["কীভাবে কাজ করে", "বাস্তব সুবিধা"],
+    "expectedSummaryMarkers": ["📌 মূল সংবাদ", "💬 কী বলা হয়েছে"]
   }
 ]
