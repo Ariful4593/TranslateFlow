@@ -74,6 +74,35 @@ window.SummarizerEngine = (function () {
   }
 
   /**
+   * Identifies documentation links, navigation boilerplate, and call-to-action fragments
+   * (e.g., "Learn more in Cache Components", "আরও জানুন", "Read more").
+   */
+  function isBoilerplateOrNavText(text) {
+    if (!text || typeof text !== 'string') return true;
+    const clean = text.trim();
+
+    // 1. Navigation / Link / CTA patterns
+    const ctaRegex = /^(learn more|read more|see also|check out|click here|find out more|refer to|for more information|for more info|for more details|view documentation|explore more|visit|get started|next steps)($|[\s.:—–])/i;
+    const ctaInlineRegex = /(learn more in|learn more about|read more in|see also|check the docs|view the docs|for more details|আরও জানুন|বিস্তারিত জানুন|বিস্তারিত দেখুন|সম্পর্কে আরও জানুন|ডকুমেন্টেশন দেখুন|এখানে ক্লিক করুন|এখানে দেখুন|টুলস দেখুন|এবং আরও|এবং আরও অনেক|और जानें|अधिक जानकारी|अधिक पढ़ें)/i;
+
+    if (ctaRegex.test(clean) || ctaInlineRegex.test(clean)) {
+      if (clean.length < 65) return true;
+    }
+
+    // 2. Section headings / breadcrumbs
+    if (/^(table of contents|quick start|overview|prerequisites|introduction|summary|conclusion|সূচিপত্র|ভূমিকা|সারসংক্ষেপ)($|[:—–])/i.test(clean)) {
+      return true;
+    }
+
+    // 3. URLs, copyright, license notices
+    if (/^(https?:\/\/|www\.|copyright|all rights reserved|©|license:)/i.test(clean)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Smart Linguistic Fallback (Learn with Sumit - LWS Explanatory Technique):
    * Breaks complex technical text into crystal-clear, intuitive takeaways:
    * 1. 🎯 মূল বিষয় (The Core Concept in simple terms)
@@ -92,7 +121,7 @@ window.SummarizerEngine = (function () {
     const rawSentences = processedText
       .split(/(?<=[।!?\n])|(?<=\.\s+)/g)
       .map((s) => s.trim())
-      .filter((s) => s.length > 12);
+      .filter((s) => s.length > 12 && !isBoilerplateOrNavText(s));
 
     if (rawSentences.length === 0) return [processedText.trim()];
 
@@ -111,6 +140,11 @@ window.SummarizerEngine = (function () {
         /^(In fact|Notice that|As you know|Furthermore|Moreover|প্রকৃতপক্ষে|উল্লেখ্য যে|যেমনটি আমরা জানি)/i.test(s) &&
         candidates.length > 0
       ) {
+        continue;
+      }
+
+      // Skip navigation boilerplate or "Learn more" links
+      if (isBoilerplateOrNavText(s)) {
         continue;
       }
 
@@ -242,7 +276,7 @@ window.SummarizerEngine = (function () {
           const lines = modelOutput
             .split('\n')
             .map((l) => l.replace(/^[-*•#\d.]+\s*/, '').trim())
-            .filter((l) => l.length > 5);
+            .filter((l) => l.length > 5 && !isBoilerplateOrNavText(l));
 
           if (lines.length > 0) {
             return formatResult(lines, 'Chrome AI Model', targetLang, context);
