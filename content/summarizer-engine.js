@@ -307,31 +307,63 @@ window.SummarizerEngine = (function () {
    * 2. 🔍 বাস্তব জীবনের উদাহরণ (Vivid relatable real-world analogy)
    * 3. ⚡ এটি আমাদের কী কাজে লাগে (Practical developer benefit / utility)
    */
-  function smartExplain(text, lang = 'bn') {
-    if (!text || !text.trim()) {
+  function smartExplain(sourceText, translatedText, lang = 'bn') {
+    const textToCheck = `${sourceText || ''} ${translatedText || ''}`.trim();
+    if (!textToCheck) {
       return {
-        concept: lang === 'bn' ? 'প্রদত্ত তথ্যটির মূল ভাব।' : 'The core concept.',
-        analogy: lang === 'bn' ? 'বাস্তব জীবনের সাধারণ নিয়মের মতোই এটি কাজ করে।' : 'Works just like everyday life principles.',
-        whyItMatters: lang === 'bn' ? 'সঠিকভাবে বুঝলে কাজ অনেক সহজ ও দ্রুত হয়।' : 'Understanding this makes work faster and simpler.'
+        concept: lang === 'bn' ? 'প্রদত্ত বিষয়টির মূল ভাব।' : 'The core concept.',
+        analogy: lang === 'bn' ? 'বাস্তব জীবনের একটি সুশৃঙ্খল সিস্টেমের মতোই এটি কাজ করে।' : 'Works like an organized everyday system.',
+        whyItMatters: lang === 'bn' ? 'সঠিকভাবে বুঝলে কাজ অনেক সহজ ও দ্রুত হয়।' : 'Understanding this makes development faster and simpler.'
       };
     }
 
-    let processedText = text;
+    let processedText = translatedText || sourceText;
     if (lang === 'bn' && window.TermGuardian?.postProcessBengaliText) {
       processedText = window.TermGuardian.postProcessBengaliText(processedText);
     }
 
-    const lower = text.toLowerCase();
+    const lower = textToCheck.toLowerCase();
     const isBn = lang === 'bn';
     const isHi = lang === 'hi';
-    const isEn = lang === 'en';
 
     let concept = '';
     let analogy = '';
     let whyItMatters = '';
 
-    // 1. Partial Prerendering (PPR) / Pre-rendering
-    if (/ppr|partial prerender|partial pre-render|prerender|prerendering|আংশিক prerendering/i.test(lower)) {
+    // 1. Parallel Routes & Slots (Next.js App Router / Dashboards)
+    if (/parallel route|parallel routes|slots|@\w+|dashboard.*team|team.*analytics|সমান্তরাল রুট|সমান্তরাল.*রেন্ডার|সমান্তরাল/i.test(lower)) {
+      if (isBn) {
+        concept = 'Next.js-এর প্যারালাল রাউটস (Parallel Routes) হলো একই লেআউটের ভেতর একাধিক স্বাধীন পেজ বা সেকশনকে (যেমন: @team বা @analytics স্লট) আলাদা কম্পোনেন্ট হিসেবে ইম্পোর্ট না করে সরাসরি স্বাধীন রাউট হিসেবে একই সাথে পাশাপাশি রেন্ডার করার আধুনিক টেকনিক।';
+        analogy = 'যেমন একটি বড় ড্যাশবোর্ডে একদিকে অ্যানালিটিক্স চার্ট এবং অন্যদিকে টিমের অ্যাক্টিভিটি—ড্রয়িং রুমের স্মার্ট টিভির Split-Screen / Picture-in-Picture মোডের মতো দুটি অংশ পাশাপাশি চলে। অ্যানালিটিক্সের ডাটা আসতে দেরি হলে পুরো পেজ আটকে থাকে না; শুধু অ্যানালিটিক্স অংশে স্পিনার দেখাবে এবং টিমের ডাটা সাথে সাথে রেন্ডার হয়ে যাবে!';
+        whyItMatters = '১. প্রতিটি স্লটের জন্য নিজস্ব loading.js ও error.js থাকায় স্বাধীন লোডিং হয়, ২. ইউজারের রোল অনুযায়ী শর্তসাপেক্ষে (@admin বা @user) স্লট দেখানো যায়, এবং ৩. ক্লায়েন্ট নেভিগেশনে অন্য অংশের স্টেট ও স্ক্রল পজিশন অবিকৃত থাকে।';
+      } else if (isHi) {
+        concept = 'सरल शब्दों में, एक ही लेआउट या पेज के भीतर कई अलग-अलग सेक्शन (जैसे टीम लिस्ट, एनालिटिक्स चार्ट) को पूरी तरह स्वतंत्र रूप से एक साथ रेंडर करने की सुविधा।';
+        analogy = 'जैसे स्मार्ट टीवी पर स्प्लिट-स्क्रीन (Split-screen) मोड—एक तरफ क्रिकेट मैच और दूसरी तरफ समाचार एक साथ चल रहे हैं, किसी एक के अटकने से दूसरा प्रभावित नहीं होता।';
+        whyItMatters = 'डैशबोर्ड का कोई धीमा हिस्सा पूरे पेज को लोड होने से नहीं रोकता और हर सेक्शन की लोडिंग व एरर अलग से संभाली जा सकती है।';
+      } else {
+        concept = 'Simultaneously rendering multiple independent pages or widgets (such as team views and analytics) within the exact same parent layout.';
+        analogy = 'Like a Picture-in-Picture or split-screen TV mode where live sports and news stream side-by-side without one freezing the other.';
+        whyItMatters = 'Allows independent loading and error states for each widget so slow sub-sections never block the overall dashboard UI.';
+      }
+    }
+    // 2. Intercepting Routes & Modal Overlays (Next.js App Router)
+    else if (/intercepting route|intercepting routes|modal route|feed modal|ইন্টারসেপ্টিং|পপআপ রুট/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ কথায়, ব্যাকগ্রাউন্ডের পেজটিকে ঠিক রেখে তার ওপরেই সাময়িকভাবে কোনো সাব-পেজ (যেমন ফটোর প্রিভিউ বা লগইন মোডাল) খুলে দেখানো; কিন্তু পেজটি রিফ্রেশ করলে বা শেয়ার করলে সেটি তার নিজস্ব পূর্ণাঙ্গ পেজে ওপেন হওয়া।';
+        analogy = 'যেমন ইনস্টাগ্রাম বা ফেসবুক ফিডে স্ক্রোল করার সময় কোনো ছবিতে ক্লিক করলে ফিড হারিয়ে যায় না, চমৎকারভাবে উপরে ছবিটি পপআপ হয়ে ভিউ হয়। আবার ছবির লিংকটি বন্ধুকে শেয়ার করলে সে সরাসরি ছবির মূল পূর্ণাঙ্গ পেজে চলে যায়।';
+        whyItMatters = 'ইউজারকে পেজ থেকে বের না করে চমৎকার অ্যাপ-লাইক ফিলিংস দেয় এবং একই সাথে রিফ্রেশ ও শেয়ারেবল ডেডিকেটেড URL-এর পূর্ণ সুবিধা বজায় থাকে।';
+      } else if (isHi) {
+        concept = 'सरल भाषा में, बैकग्राउंड पेज को बदले बिना उसके ऊपर ही कोई सब-पेज (जैसे फोटो प्रिव्यू या लॉगिन मॉडल) दिखाना, लेकिन रिफ्रेश करने पर पूरे पेज के रूप में खुलना।';
+        analogy = 'जैसे इंस्टाग्राम फीड में किसी तस्वीर पर क्लिक करने पर फीड नहीं हटती बल्कि ऊपर पॉपअप आता है, और लिंक शेयर करने पर पूरा फोटो पेज खुलता है।';
+        whyItMatters = 'यूजर को सहज अनुभव मिलता है और साथ ही शेयर करने योग्य यूआरएल की सुविधा भी बनी रहती है।';
+      } else {
+        concept = 'Loading a route within the current layout while displaying a modal or preview, yet rendering full-page upon direct URL visit or page reload.';
+        analogy = 'Like tapping an Instagram photo that opens in a quick overlay without losing your feed position, while sharing the link opens the dedicated photo page.';
+        whyItMatters = 'Delivers seamless app-like modal experiences while preserving shareable deep links and standard browser history.';
+      }
+    }
+    // 3. Partial Prerendering (PPR) / Pre-rendering
+    else if (/ppr|partial prerender|partial pre-render|prerender|prerendering|আংশিক prerendering|আংশিক prerender/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ করে বললে, একটি ওয়েবপেজের যেসব অংশ সবার জন্য এক (যেমন হেডার, সাইডবার, ফুটার) সেগুলো আগে থেকেই প্রস্তুত রেখে নিমিষেই স্ক্রিনে দেখানো; আর যেসব অংশে লাইভ ডাটা লাগে (যেমন ইউজারের কার্ট বা ব্যালেন্স) সেগুলোকে ব্যাকগ্রাউন্ডে রেডি করে এনে বসিয়ে দেওয়া।';
         analogy = 'যেমন ধরুন রেস্তোরাঁয় বসামাত্রই টেবিল, পানির গ্লাস ও মেনু কার্ড আগে থেকেই রেডি থাকে (স্ট্যাটিক শেল)। আপনি বসামাত্র তা পেয়ে যান। এরপর আপনি যে বিশেষ খাবারটি অর্ডার করলেন, বাবুর্চি শুধু সেই খাবারটুকু ফ্রেশ রান্না করে টেবিলে এনে দেয় (ডাইনামিক স্ট্রিমিং)। পুরো রেস্তোরাঁ নতুন করে তৈরি করতে হয় না!';
@@ -346,8 +378,8 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Eliminates blank loading screens, delivering instant static speed alongside fresh dynamic user data in a single request.';
       }
     }
-    // 2. Server Components (RSC) / Server-side vs Client-side
-    else if (/server component|server components|rsc|server-side|serverside|client component|client components/i.test(lower)) {
+    // 4. Server Components (RSC) / Server-side vs Client-side
+    else if (/server component|server components|rsc|server-side|serverside|client component|client components|সার্ভার কম্পোনেন্ট|ক্লায়েন্ট কম্পোনেন্ট/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ ভাষায়, ভারী ডাটাবেস কোয়েরি ও ক্যালকুলেশনের কাজগুলো ইউজারের ব্রাউজারে না চাপিয়ে সরাসরি সার্ভারেই শেষ করে নেওয়া, আর ইউজারের ডিভাইসে শুধু হালকা আউটপুট পাঠানো।';
         analogy = 'যেমন হোটেলের শেফ ব্যাকগ্রাউন্ডের কিচেনে সমস্ত মসলা পিষে খাবার রান্না করে আপনাকে শুধু সুন্দর প্লেটে খাবার সাজিয়ে দেয়, রান্নার ভারী যন্ত্রপাতি আপনার ডাইনিং টেবিলে নিয়ে আসে না।';
@@ -362,10 +394,10 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Zero client-side JavaScript bundle impact, faster page loads on mobile devices, and secure direct database access.';
       }
     }
-    // 3. Streaming / Suspense / Granular Streaming
-    else if (/streaming|suspense|chunked|chunking|stream/i.test(lower)) {
+    // 5. Streaming / Suspense / Granular Streaming
+    else if (/streaming|suspense|chunked|chunking|stream in|স্ট্রিমিং|সাসপেন্স/i.test(lower)) {
       if (isBn) {
-        concept = 'সহজ করে বললে, পুরো পেজের সব ডাটা একসাথে তৈরি হওয়ার জন্য অপেক্ষা না করে, যে অংশটুকু আগে রেডি হচ্ছে তা সাথে সাথে ইউজারের সামনে তুলে ধরা।';
+        concept = 'সহজ করে বললে, পুরো পেজের সব ডাটা একসাথে তৈরি হওয়ার জন্য অপেক্ষা না করে, যে অংশটুকু আগে রেডি হচ্ছে তা সাথে সাথে ইউজারের সামনে তুলে ধরা এবং বাকি অংশের জন্য স্কেলিটন লোডার দেখানো।';
         analogy = 'যেমন ইউটিউব বা নেটফ্লিক্সে ভিডিও দেখার সময় পুরো ২ ঘণ্টার সিনেমা ডাউনলোড হওয়া পর্যন্ত বসে থাকতে হয় না, যতটুকু ডাটা আসছে ততটুকু সাথে সাথে প্লে হতে থাকে।';
         whyItMatters = 'ধীরগতির ইন্টারনেটেও ইউজার সাথে সাথে পেজের সাথে ইন্টারঅ্যাক্ট করা শুরু করতে পারে, স্ক্রিন আটকে থাকে না।';
       } else if (isHi) {
@@ -378,8 +410,104 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Maximizes perceived performance and user engagement even on high-latency mobile networks.';
       }
     }
-    // 4. React Components / Props / State
-    else if (/component|props|state|reactivity/i.test(lower) && !/ppr|prerender/i.test(lower)) {
+    // 6. Server Actions / Mutations / Form Handling
+    else if (/server action|server actions|form action|useactionstate|সার্ভার অ্যাকশন/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ কথায়, আলাদা কোনো REST API এন্ডপয়েন্ট বা রুট হ্যান্ডলার তৈরি না করেই সরাসরি React কম্পোনেন্ট বা ফর্ম থেকে ব্যাকএন্ডের ফাংশন কল করে ডাটাবেস আপডেট করার আধুনিক পদ্ধতি।';
+        analogy = 'যেমন কোনো ফর্ম পূরণ করে সরাসরি মূল কর্মকর্তার ডেস্কে জমা দেওয়ার মতো—মাঝখানের কোনো পিওন বা মধ্যস্থতাকারীর (আলাদা API রুট) জন্য আলাদা লাইন ধরতে হয় না।';
+        whyItMatters = 'বয়লারপ্লেট API হ্যান্ডলার লেখার ঝামেলা দূর হয়, টাইপ সেফটি বজায় থাকে এবং জাভাস্ক্রিপ্ট বন্ধ থাকলেও ফর্ম সাবমিট নিখুঁতভাবে কাজ করে।';
+      } else if (isHi) {
+        concept = 'सरल शब्दों में, बिना अलग एपीआई रूट बनाए सीधे रिएक्ट कंपोनेंट से सर्वर फंक्शन चलाकर डेटाबेस में बदलाव करने का तरीका।';
+        analogy = 'जैसे किसी फॉर्म को सीधे मुख्य अधिकारी को सौंपना, बिना किसी बिचौलिए या अलग काउंटर की लाइन में लगे।';
+        whyItMatters = 'अनावश्यक कोड कम होता है और बिना जावास्क्रिप्ट के भी फॉर्म सुरक्षित रूप से काम करता है।';
+      } else {
+        concept = 'Directly calling asynchronous backend server functions from UI components and forms without creating separate REST API endpoints.';
+        analogy = 'Like dropping an official form directly onto the director\'s desk without standing in line at an intermediary dispatch window.';
+        whyItMatters = 'Eliminates boilerplate API endpoint code, preserves end-to-end type safety, and supports progressive enhancement.';
+      }
+    }
+    // 7. Middleware (Next.js / Express)
+    else if (/middleware|মিডলওয়্যার|নেক্সট মিডলওয়্যার/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ ভাষায়, ইউজার কোনো রিকোয়েস্ট পাঠানোর পর সেটি পেজে পৌঁছানোর ঠিক আগেই মাঝপথে আটকে দিয়ে চেক করা (যেমন ইউজার লগইন করা আছে কিনা বা তার লোকেশন কী)।';
+        analogy = 'যেমন কোনো সুরক্ষিত অফিসের প্রবেশদ্বারে দাঁড়ানো সিকিউরিটি গার্ড—সবার আইডি কার্ড চেক করে সঠিক রুমে যেতে দেওয়া হয় অথবা অনুমতি না থাকলে গেট থেকেই রিডাইরেক্ট করে ফেরত পাঠানো হয়।';
+        whyItMatters = 'প্রতিটি পেজে আলাদা করে লগইন ভ্যালিডেশনের কোড না লিখে এক জায়গায় কেন্দ্রীয়ভাবে সিকিউরিটি ও রিডাইরেকশন নিয়ন্ত্রণ করা যায়।';
+      } else if (isHi) {
+        concept = 'सरल भाषा में, रिक्वेस्ट के पेज तक पहुंचने से पहले बीच में ही उसे जांचना और आवश्यकतानुसार रीडायरेक्ट या ब्लॉक करना।';
+        analogy = 'जैसे मुख्य द्वार पर तैनात सुरक्षा गार्ड, जो पास चेक करके ही अंदर जाने की अनुमति देता है।';
+        whyItMatters = 'सुरक्षा और रीडायरेक्शन का काम एक ही जगह से व्यवस्थित हो जाता है।';
+      } else {
+        concept = 'Running code before a request is completed to inspect headers, authenticate users, or rewrite URL paths.';
+        analogy = 'Like a security checkpoint at a corporate lobby verifying guest badges before permitting elevator access to designated floors.';
+        whyItMatters = 'Centralizes authentication, geolocation redirects, and bot protection across every single application route.';
+      }
+    }
+    // 8. Layouts & Nested Layouts
+    else if (/nested layout|layouts|layout|লেআউট/i.test(lower) && !/parallel|ppr/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ ভাষায়, ওয়েবসাইটের কমন অংশগুলো (যেমন হেডার, সাইডবার, ফুটার) এক জায়গায় ডিফাইন করে রাখা, যাতে অন্য পেজে নেভিগেট করলেও এগুলো নতুন করে লোড না হয়ে ফিক্সড থাকে এবং শুধুমাত্র ভেতরের কনটেন্ট পরিবর্তন হয়।';
+        analogy = 'যেমন একটি ফটো অ্যালবামের শক্ত বাঁধাই করা ফ্রেম—ভেতরের ছবিগুলো একটার পর একটা পাতা উল্টে বদলানো যায়, কিন্তু অ্যালবামের মূল ফ্রেম ও সাইজ একই থাকে।';
+        whyItMatters = 'পেজ পরিবর্তনের সময় সাইডবার বা হেডার ফ্লিকার করে না, স্টেট সংরক্ষিত থাকে এবং সাইট সুপার স্মুথ ও ফাস্ট মনে হয়।';
+      } else if (isHi) {
+        concept = 'सरल शब्दों में, वेबसाइट के साझा ढाँचे (हेडर, साइडबार) को स्थिर रखना ताकि पेज बदलने पर वे दोबारा लोड न हों।';
+        analogy = 'जैसे फोटो फ्रेम वही रहता है, बस उसके अंदर की तस्वीर बदल दी जाती है।';
+        whyItMatters = 'नेविगेशन बहुत स्मूथ होता है और अनावश्यक रेंडरिंग से बचत होती है।';
+      } else {
+        concept = 'Sharing persistent UI structures (headers, sidebars) across routes without re-rendering them upon navigation.';
+        analogy = 'Like a picture frame that stays mounted on the wall while you effortlessly swap the photos displayed inside.';
+        whyItMatters = 'Prevents UI flicker during navigation, preserves scroll position, and dramatically speeds up page transitions.';
+      }
+    }
+    // 9. Hydration / Rehydration
+    else if (/hydration|rehydration|হাইড্রেট|হাইড্রেটিং/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ ভাষায়, সার্ভার থেকে পাঠানো রেডিমেড স্ট্যাটিক HTML কোডের সাথে ক্লায়েন্টের জাভাস্ক্রিপ্ট ইভেন্ট লিসেনারগুলো (যেমন ক্লিক, হোভার) যুক্ত করে পেজটিকে সক্রিয় ও ইন্টারঅ্যাক্টিভ করে তোলা।';
+        analogy = 'যেমন শুষ্ক গাছপালায় পানি ঢালার মতো—গাছের কাঠামো আগেই তৈরি ছিল, পানি দেওয়ার পর তা সতেজ হয়ে নড়াচড়া ও সাড়া দেওয়া শুরু করল!';
+        whyItMatters = 'ইউজার নিমিষেই পেজের লেখা ও ছবি দেখতে পায় (Fast Initial Paint) এবং মুহূর্তের মধ্যে বাটনে ক্লিক করে কাজ শুরু করতে পারে।';
+      } else if (isHi) {
+        concept = 'सरल शब्दों में, सर्वर से आए एचटीएमएल में जावास्क्रिप्ट इवेंट्स जोड़कर पेज को पूरी तरह इंटरैक्टिव बनाना।';
+        analogy = 'जैसे किसी पुतले में जान फूंकना—ढांचा पहले से तैयार था, अब वह छूने पर प्रतिक्रिया देने लगता है।';
+        whyItMatters = 'पेज तुरंत दिखाई देता है और बहुत तेजी से काम करने के लिए तैयार हो जाता है।';
+      } else {
+        concept = 'Attaching client-side event listeners to server-rendered HTML so the page becomes fully interactive.';
+        analogy = 'Like watering a plant—the physical structure exists instantly, and moisture brings it to lively responsive action.';
+        whyItMatters = 'Delivers blazing fast initial visual paint while powering seamless dynamic interactions.';
+      }
+    }
+    // 10. State Management & Context API / Redux / Zustand
+    else if (/redux|zustand|context api|usecontext|state management|গ্লোবাল স্টেট/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ করে বললে, পুরো অ্যাপের সব কম্পোনেন্টের প্রয়োজনীয় ডাটা একটি কেন্দ্রীয় ভাণ্ডারে রাখা, যাতে যেকোনো কম্পোনেন্ট এক ক্লিকেই তা পড়তে বা আপডেট করতে পারে।';
+        analogy = 'যেমন ড্রয়িং রুমের কমন নোটিশ বোর্ড বা ফ্রিজ—যেখানে সবাই যার যার দরকারি জিনিস রাখতে পারে এবং অন্য যে কেউ সরাসরি সেখান থেকে নিতে পারে; একজন একজন করে হাতবদল (Props Drilling) করতে হয় না।';
+        whyItMatters = 'জটিল কম্পোনেন্ট ট্রিতে একের পর এক প্রপস পাঠানোর ঝামেলা থেকে মুক্তি পাওয়া যায় এবং পুরো অ্যাপের স্টেট শৃঙ্খলাবদ্ধ থাকে।';
+      } else if (isHi) {
+        concept = 'सरल शब्दों में, पूरी ऐप का डेटा एक केंद्रीय स्थान पर रखना ताकि कोई भी कंपोनेंट सीधे उसे एक्सेस कर सके।';
+        analogy = 'जैसे घर का कॉमन नोटिस बोर्ड—सबकी जानकारी एक जगह रहती है और किसी को व्यक्तिगत रूप से मैसेज नहीं भेजना पड़ता।';
+        whyItMatters = 'प्रॉप्स ड्रिलिंग से मुक्ति मिलती है और डेटा का प्रवाह बिल्कुल साफ रहता है।';
+      } else {
+        concept = 'A centralized shared data store that any component in the tree can read from or write to directly.';
+        analogy = 'Like a shared bulletin board in an office common area rather than whispering a message from desk to desk.';
+        whyItMatters = 'Completely eliminates props drilling and ensures synchronicity across distant components.';
+      }
+    }
+    // 11. React Hooks
+    else if (/useeffect|usestate|usememo|usecallback|custom hook|react hook|হুক/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ কথায়, ফাংশনাল কম্পোনেন্টের ভেতরেই স্টেট, সাইড ইফেক্ট বা পারফরম্যান্স অপ্টিমাইজেশন লজিক খুব সহজে প্লাগইন করার আধুনিক উপায়।';
+        analogy = 'যেমন একটি বহুমুখী সুইস আর্মি নাইফ (Swiss Army Knife)—যেখানে একটি ছোট টুলের ভেতর থেকেই দরকার অনুযায়ী কাঁচি, স্ক্রু-ড্রাইভার বা করাত টেনে বের করে ব্যবহার করা যায়।';
+        whyItMatters = 'ক্লাস কম্পোনেন্টের জটিলতা ও বয়লারপ্লেট ছাড়াই পরিচ্ছন্ন, আধুনিক ও পুনঃব্যবহারযোগ্য কোড লেখা যায়।';
+      } else if (isHi) {
+        concept = 'सरल शब्दों में, फंक्शनल कंपोनेंट्स में स्टेट और लाइफसाइकिल लॉजिक को आसानी से जोड़ने का तरीका।';
+        analogy = 'जैसे स्विस आर्मी चाकू—एक ही छोटे टूल में जरूरत के सारे औजार मौजूद होते हैं।';
+        whyItMatters = 'क्लास कंपोनेंट के जटिल कोड के बिना साफ-सुथरा और रीयूजेबल कोड लिखा जा सकता है।';
+      } else {
+        concept = 'Modular functions that allow functional components to hook into React state, lifecycles, and caching.';
+        analogy = 'Like a Swiss Army knife where specialized attachments (blades, screwdrivers) snap out as needed.';
+        whyItMatters = 'Enables clean separation of concerns, reusable business logic, and simpler component architectures.';
+      }
+    }
+    // 12. React Components / Props / State
+    else if (/component|props|state|reactivity/i.test(lower) && !/ppr|prerender|parallel/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ কথায়, একটি ওয়েবসাইটের পুরো লেআউটকে ছোট ছোট স্বাধীন টুকরোতে (যেমন হেডার, বাটন, প্রোডাক্ট কার্ড) ভাগ করে তৈরি করা এবং প্রয়োজনমতো ডাটা দিয়ে সেগুলোকে নিয়ন্ত্রণ করা।';
         analogy = 'যেমন লেগো (Lego) ব্লকের প্রতিটি টুকরো আলাদা থাকে এবং বিভিন্ন রঙের ব্লক জোড়া লাগিয়ে যেমন আস্ত একটি সুন্দর বাড়ি বানানো যায়, তেমনি কোডিংয়েও ছোট ছোট কম্পোনেন্ট জোড়া দিয়ে বড় বড় ওয়েবসাইট তৈরি করা হয়।';
@@ -394,7 +522,23 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Enables massive code reusability, clean separation of concerns, and rapid UI development.';
       }
     }
-    // 5. Audio / AudioContext / Web Audio API
+    // 13. Dynamic Routes & Slugs
+    else if (/dynamic route|dynamic routes|\[slug\]|\[id\]|ডাইনামিক রুট/i.test(lower)) {
+      if (isBn) {
+        concept = 'সহজ কথায়, হাজার হাজার প্রোডাক্ট বা ব্লগ পোস্টের জন্য আলাদা আলাদা পেজ ফাইল তৈরি না করে, একটিমাত্র কমন টেমপ্লেট দিয়ে ইউআরএলের আইডি অনুযায়ী স্বয়ংক্রিয়ভাবে ডাটা লোড করানো।';
+        analogy = 'যেমন পাসপোর্টের ফাঁকা ফরম্যাট—যেখানে ফরম্যাট সবার জন্য একই থাকে, কিন্তু একেক ব্যক্তির নাম ও ছবি বসিয়ে তাদের নিজস্ব পাসপোর্ট তৈরি করে দেওয়া হয়।';
+        whyItMatters = 'কোটি কোটি ইউজারের প্রোফাইল বা পণ্যের জন্য মাত্র একটি পেজ ফাইল লিখলেই যথেষ্ট হয়।';
+      } else if (isHi) {
+        concept = 'सरल शब्दों में, लाखों उत्पादों या पोस्टों के लिए अलग-अलग पेज बनाने के बजाय एक कॉमन टेम्पलेट से काम चलाना।';
+        analogy = 'जैसे पासपोर्ट का खाली फॉर्म—फॉर्मेट वही रहता है, बस यूजर का नाम और फोटो बदलकर नया पासपोर्ट बन जाता है।';
+        whyItMatters = 'लाखों पेजों के लिए सिर्फ एक फाइल लिखनी पड़ती है और वेबसाइट मेंटेन करना बहुत आसान होता है।';
+      } else {
+        concept = 'Defining flexible route parameters that dynamically render matching content for thousands of unique URL paths from a single template.';
+        analogy = 'Like a standardized passport template where the layout is fixed, but individual names and photos fill in per citizen.';
+        whyItMatters = 'Scales single codebases to millions of programmatic pages without duplicate files.';
+      }
+    }
+    // 14. Audio / AudioContext / Web Audio API
     else if (/audio|sound|audiocontext|track|<audio>/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ কথায়, সাধারণ মিউজিক প্লেয়ারের বাইরে সরাসরি কোডের মাধ্যমে ব্রাউজারে শব্দ তৈরি করা, সাউন্ড মডিফাই করা এবং বিভিন্ন স্পেশাল ইফেক্ট যুক্ত করার আধুনিক অডিও কন্ট্রোল সিস্টেম।';
@@ -410,7 +554,7 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Enables professional web games, interactive synthesizers, and real-time audio visualization natively.';
       }
     }
-    // 6. Caching / Memoization / Performance Optimization
+    // 15. Caching / Memoization / Performance Optimization
     else if (/cache|caching|memo|usememo|cdn/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ কথায়, একই হিসাব বা ডাটা বারবার সার্ভার থেকে না এনে, আগের ফলাফলটি মেমোরিতে জমিয়ে রাখা যাতে পরবর্তীতে চাইলেই পলকে সাপ্লাই দেওয়া যায়।';
@@ -426,8 +570,8 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Reduces server resource consumption, slashes network latency, and delivers instantaneous UI responses.';
       }
     }
-    // 7. API / Data Fetching / Backend Communication
-    else if (/api|fetch|request|server|backend|endpoint/i.test(lower)) {
+    // 16. API / Data Fetching / Backend Communication
+    else if (/api|fetch|request|backend|endpoint|সার্ভার/i.test(lower) && !/server component|server action/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ ভাষায়, ফ্রন্টএন্ড ওয়েবসাইট এবং পেছনের ডাটাবেসের মধ্যে নিরাপদে ডাটা চাওয়া ও পাওয়ার সুনির্দিষ্ট মাধ্যম বা সংযোগ সেতু।';
         analogy = 'যেমন রেস্তোরাঁর ওয়েটার—আপনি মেনু কার্ড দেখে অর্ডার দিলে ওয়েটার সেই বার্তা কিচেনে বাবুর্চির কাছে নিয়ে যায় এবং রান্না শেষ হলে খাবার আপনার টেবিলে এনে পরিবেশন করে।';
@@ -442,12 +586,12 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Provides clean abstraction, secure data validation, and clean decoupling between UI and database architecture.';
       }
     }
-    // 8. Error Handling / Try-Catch / Error Boundaries / Exceptions
-    else if (/error|exception|catch|handling/i.test(lower)) {
+    // 17. Error Handling / Try-Catch / Error Boundaries / Exceptions
+    else if (/error|exception|catch|handling|ভুল/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ ভাষায়, কোডে বা নেটওয়ার্কে কোনো অপ্রত্যাশিত ভুল হলেও যেন পুরো অ্যাপ্লিকেশন ধপাস করে ক্র্যাশ না করে, বরং সুন্দর কোনো নোটিশ দেখিয়ে পরিস্থিতি সামাল দেওয়া।';
-        analogy = 'যেমন গাড়ির সিটবেল্ট ও এয়ারব্যাগ—রাস্তায় কোনো অনাকাঙ্ক্ষিত ঝাঁকুনি বা ব্রেক ঘটলেও যাতে ভেতরের যাত্রীর কোনো বড় বিপদ না হয়, তার পূর্বপ্রস্তুতি।';
-        whyItMatters = 'ইউজারের কাজ নষ্ট হয় না এবং অ্যাপের নির্ভরযোগ্যতা ও প্রফেশনালিজম বজায় থাকে।';
+        analogy = 'যেমন গাড়ির সিটবেল্ট ও এয়ারব্যাগ অথবা সার্কাসের ট্রাপিজ খেলার নিচে টানানো সেফটি নেট—যাতে অপ্রত্যাশিত কোনো ঝাঁকুনি ঘটলেও বড় কোনো বিপদ ছাড়া পরিস্থিতি সামাল দেওয়া যায়।';
+        whyItMatters = 'ইউজারের কাজ ও ডাটা নষ্ট হয় না এবং অ্যাপের পেশাদারিত্ব বজায় থাকে।';
       } else if (isHi) {
         concept = 'सरल शब्दों में, कोड में कोई अप्रत्याशित गड़बड़ी होने पर पूरी ऐप को क्रैश होने से बचाना और शालीनता से समस्या को संभालना।';
         analogy = 'जैसे कार की सीटबेल्ट और एयरबैग—सड़क पर अचानक झटका लगने पर भी यात्री को बड़ी चोट से सुरक्षित रखते हैं।';
@@ -458,14 +602,14 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Prevents full-app breakdowns, preserves user session state, and ensures reliable recovery paths.';
       }
     }
-    // 9. Routing / Navigation / Pages
-    else if (/routing|router|navigation|route/i.test(lower)) {
+    // 18. Routing / Navigation / Pages (General)
+    else if (/routing|router|navigation|route|রুট|নেভিগেশন/i.test(lower)) {
       if (isBn) {
-        concept = 'সহজ করে বললে, ইউজার ব্রাউজারের অ্যাড্রেস বারে কোন লিংকে গেল বা কোন মেনুতে ক্লিক করল, তা দেখে সাথে সাথে সঠিক পেজটি তার সামনে হাজির করা।';
-        analogy = 'যেমন রেললাইনের পয়েন্ট সুইচ—ট্রেন কোন স্টেশনে যাবে তা লাইনের পয়েন্ট ঘুরিয়ে ঠিক করে দেওয়া হয়।';
-        whyItMatters = 'সম্পূর্ণ ওয়েবসাইট রিলোড না হয়ে দ্রুত এক পেজ থেকে অন্য পেজে যাওয়া যায়।';
+        concept = 'সহজ করে বললে, ইউজার ব্রাউজারের অ্যাড্রেস বারে কোন লিংকে গেল বা কোন মেনুতে ক্লিক করল, তা দেখে সম্পূর্ণ পেজ রিলোড ছাড়াই পলকে সঠিক স্ক্রিন তার সামনে হাজির করা।';
+        analogy = 'যেমন রেললাইনের পয়েন্ট সুইচ—ট্রেন কোন স্টেশনে যাবে তা লাইনের পয়েন্ট ঘুরিয়ে মসৃণভাবে ঠিক করে দেওয়া হয়।';
+        whyItMatters = 'সম্পূর্ণ ওয়েবসাইট রিলোড না হয়ে দ্রুত এক পেজ থেকে অন্য পেজে যাওয়া যায় এবং সিঙ্গেল পেজ অ্যাপ্লিকেশনের স্পিড পাওয়া যায়।';
       } else if (isHi) {
-        concept = 'सरल शब्दों में, यूजर किस यूआरएल या लिंक पर क्लिक करता है, उसके आधार पर सही पेज या दृश्य सामने लाना।';
+        concept = 'सरल शब्दों में, यूजर किस यूआरएल या लिंक पर क्लिक करता है, उसके आधार पर बिना पेज रीलोड किए सही दृश्य सामने लाना।';
         analogy = 'जैसे रेलवे ट्रैक का स्विच, जो ट्रेन को उसकी सही पटरी और स्टेशन की ओर मोड़ देता है।';
         whyItMatters = 'बिना पूरा पेज दोबारा लोड किए आसानी से एक हिस्से से दूसरे हिस्से में जाया जा सकता है।';
       } else {
@@ -474,7 +618,7 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Enables lightning-fast single-page application navigation with persistent global state.';
       }
     }
-    // 10. News / Transport / Public Administration
+    // 19. News / Transport / Public Administration
     else if (/bus|traffic|minister|accident|police|dhaka|government|cabinet|parliament/i.test(lower)) {
       if (isBn) {
         concept = 'সহজ কথায়, সাম্প্রতিক ঘটনা বা নেওয়া সিদ্ধান্তের মূল উদ্দেশ্য এবং সাধারণ মানুষের দৈনন্দিন জীবনে এর প্রভাব কী তা স্পষ্টভাবে তুলে ধরা।';
@@ -490,7 +634,7 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Establishes systemic accountability, lowers transit friction, and saves valuable commuter time.';
       }
     }
-    // 11. General / Default Fallback
+    // 20. Contextual Adaptive Fallback (Intelligent Linguistic Synthesis - No Static Clock Analogies!)
     else {
       const rawSentences = processedText
         .split(/(?<=[।!?\n])|(?<=\.\s+)/g)
@@ -499,20 +643,20 @@ window.SummarizerEngine = (function () {
 
       const rawClean = (rawSentences[0] || processedText.trim())
         .replace(/^[-*•#\d.]+\s*/, '')
-        .replace(/^(একটি|এটি একটি|ইহা একটি)\s+/i, '')
+        .replace(/^(একটি|এটি একটি|ইহা একটি|মূলত|সহজ ভাষায়)\s+/i, '')
         .trim();
 
       if (isBn) {
         concept = `সহজ ভাষায় বললে, মূল বিষয়টি হলো—${rawClean}`;
-        analogy = 'যেমন একটি ঘড়ির অভ্যন্তরীণ গিয়ার বা চক্র—বাইরে থেকে শুধু সময় দেখা যায়, কিন্তু ভেতরে ছোট ছোট চাকাগুলোর নিখুঁত সমন্বয়ে পুরো ঘড়িটি নিরবচ্ছিন্নভাবে সঠিক সময় দিয়ে চলে।';
-        whyItMatters = 'মূল বিষয়টি পরিষ্কার জানা থাকলে বাস্তব কাজে কোনো ভুল বোঝাবুঝি থাকে না এবং আত্মবিশ্বাসের সাথে দ্রুত সমাধান করা যায়।';
+        analogy = 'যেমন একটি সুপরিকল্পিত কারখানায় প্রতিটি দল যার যার নির্দিষ্ট দায়িত্ব আলাদাভাবে পালন করে যাতে পুরো প্রজেক্ট কোনো ঝামেলা ছাড়াই নিখুঁতভাবে সমাপ্ত হয়।';
+        whyItMatters = 'বিষয়টি স্পষ্টভাবে জানা থাকলে কোডিং ও আর্কিটেকচারে কোনো ভুল বোঝাবুঝি থাকে না এবং দ্রুত সঠিক সমাধান প্রয়োগ করা যায়।';
       } else if (isHi) {
         concept = `सरल शब्दों में, मुख्य बात यह है कि—${rawClean}`;
-        analogy = 'जैसे किसी घड़ी के आंतरिक पुर्जे एक साथ मिलकर पूरी घड़ी को सही समय दिखाने के लिए सुचारू रूप से चलाते हैं।';
+        analogy = 'जैसे किसी सुव्यवस्थित कारखाने में प्रत्येक टीम अपना काम अलग से करती है ताकि पूरी परियोजना समय पर और बिना बाधा के पूरी हो।';
         whyItMatters = 'मूल अवधारणा स्पष्ट होने से काम में कोई गलती नहीं होती और उत्पादकता बढ़ती है।';
       } else {
-        concept = `In simple terms, the core essence is: ${rawClean}`;
-        analogy = 'Like precision gears inside a clockwork mechanism where individual pieces align to drive the entire system smoothly.';
+        concept = `In plain terms, the core concept is: ${rawClean}`;
+        analogy = 'Like specialized stations on an organized assembly line working in harmony to complete deliverables efficiently.';
         whyItMatters = 'Gives foundational clarity to build and optimize solutions without subtle bugs or misconceptions.';
       }
     }
@@ -572,8 +716,7 @@ window.SummarizerEngine = (function () {
     }
 
     // Attempt 2: Smart Pedagogical Analogy Generator (Guaranteed, Instant, Zero-Lag)
-    const baseText = translatedText || sourceText;
-    const result = smartExplain(baseText, targetLang);
+    const result = smartExplain(sourceText, translatedText, targetLang);
 
     const isBn = targetLang === 'bn';
     const isHi = targetLang === 'hi';

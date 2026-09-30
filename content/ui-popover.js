@@ -1953,8 +1953,8 @@ window.UIPopover = (function () {
       console.warn('Explain error:', err);
       if (isShowingExplanation) {
         const fallback = window.SummarizerEngine?.smartExplain
-          ? window.SummarizerEngine.smartExplain(currentTranslatedText || originalSelectedText, currentTargetLang)
-          : { concept: currentTranslatedText, analogy: '', whyItMatters: '' };
+          ? window.SummarizerEngine.smartExplain(originalSelectedText, currentTranslatedText, currentTargetLang)
+          : { concept: currentTranslatedText || originalSelectedText, analogy: '', whyItMatters: '' };
 
         const isBn = currentTargetLang === 'bn';
         const isHi = currentTargetLang === 'hi';
