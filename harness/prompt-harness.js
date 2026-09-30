@@ -14,19 +14,20 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  // Multilingual UI & Summary Labels Dictionary
+  // Multilingual UI, Summary & Explanation Labels Dictionary
   const I18N_LABELS = {
     bn: {
       copy: 'কপি',
       copied: 'কপি হয়েছে!',
       listen: 'শুনুন',
       stop: 'থামান',
-      replace: '⇄ প্রতিস্থাপন',
-      undo: '↺ পূর্বাবস্থায় ফিরুন',
+      explain: 'সহজ ব্যাখ্যা',
+      explaining: 'সহজ ভাষায় বুঝিয়ে দেওয়া হচ্ছে...',
       summary: 'সারসংক্ষেপ',
       fullText: '↩ মূল অনুবাদ',
       summarizing: 'সহজ ভাষায় সারসংক্ষেপ তৈরি হচ্ছে...',
       badge: '💡 সহজ ভাষায় সারসংক্ষেপ',
+      explainBadge: '🧠 সহজ ভাষায় বিশ্লেষণ',
       prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: ']
     },
     hi: {
@@ -34,12 +35,13 @@
       copied: 'कॉपी हो गया!',
       listen: 'सुनें',
       stop: 'रोकें',
-      replace: '⇄ बदलें',
-      undo: '↺ पहले जैसा करें',
+      explain: 'सरल व्याख्या',
+      explaining: 'सरल भाषा में समझ रहे हैं...',
       summary: 'सारांश',
       fullText: '↩ मूल अनुवाद',
       summarizing: 'सरल भाषा में सारांश तैयार हो रहा है...',
       badge: '💡 मुख्य बातें (सरल सारांश)',
+      explainBadge: '🧠 सरल भाषा में व्याख्या',
       prefixes: ['🎯 मुख्य विषय: ', '⚙️ यह कैसे काम करता है: ', '💡 व्यावहारिक लाभ: ']
     },
     es: {
@@ -47,12 +49,13 @@
       copied: '¡Copiado!',
       listen: 'Escuchar',
       stop: 'Detener',
-      replace: '⇄ Reemplazar',
-      undo: '↺ Deshacer',
+      explain: 'Explicar',
+      explaining: 'Explicando en términos sencillos...',
       summary: 'Resumen',
       fullText: '↩ Texto Original',
       summarizing: 'Generando resumen...',
       badge: '💡 Puntos Clave',
+      explainBadge: '🧠 Explicación Didáctica',
       prefixes: ['🎯 Concepto Clave: ', '⚙️ Cómo funciona: ', '💡 Beneficio Práctico: ']
     },
     fr: {
@@ -60,12 +63,13 @@
       copied: 'Copié !',
       listen: 'Écouter',
       stop: 'Arrêter',
-      replace: '⇄ Remplacer',
-      undo: '↺ Annuler',
+      explain: 'Expliquer',
+      explaining: 'Explication simple en cours...',
       summary: 'Résumé',
       fullText: '↩ Texte Complet',
       summarizing: 'Résumé en cours...',
       badge: '💡 Points Clés',
+      explainBadge: '🧠 Explication Simple',
       prefixes: ['🎯 Concept Clé: ', '⚙️ Fonctionnement: ', '💡 Avantage Pratique: ']
     },
     de: {
@@ -73,12 +77,13 @@
       copied: 'Kopiert!',
       listen: 'Anhören',
       stop: 'Stopp',
-      replace: '⇄ Ersetzen',
-      undo: '↺ Rückgängig',
+      explain: 'Erklären',
+      explaining: 'Einfache Erklärung wird erstellt...',
       summary: 'Zusammenfassung',
       fullText: '↩ Vollständiger Text',
       summarizing: 'Zusammenfassung wird erstellt...',
       badge: '💡 Wichtigste Punkte',
+      explainBadge: '🧠 Einfache Erklärung',
       prefixes: ['🎯 Kernkonzept: ', '⚙️ Funktionsweise: ', '💡 Praktischer Nutzen: ']
     },
     ar: {
@@ -86,12 +91,13 @@
       copied: 'تم النسخ!',
       listen: 'استماع',
       stop: 'إيقاف',
-      replace: '⇄ استبدال',
-      undo: '↺ تراجع',
+      explain: 'شرح مبسط',
+      explaining: 'جاري التبسيط والتوضيح...',
       summary: 'ملخص',
       fullText: '↩ النص الكامل',
       summarizing: 'جاري إنشاء الملخص...',
       badge: '💡 أهم النقاط',
+      explainBadge: '🧠 شرح مبسط ومفصل',
       prefixes: ['🎯 المفهوم الأساسي: ', '⚙️ كيف يعمل: ', '💡 الفائدة العملية: ']
     },
     zh: {
@@ -99,12 +105,13 @@
       copied: '已复制！',
       listen: '朗读',
       stop: '停止',
-      replace: '⇄ 替换',
-      undo: '↺ 撤销',
+      explain: '通俗讲解',
+      explaining: '正在用通俗语言解析...',
       summary: '要点摘要',
       fullText: '↩ 完整译文',
       summarizing: '正在生成摘要...',
       badge: '💡 核心要点',
+      explainBadge: '🧠 通俗原理解析',
       prefixes: ['🎯 核心概念: ', '⚙️ 工作原理: ', '💡 实际应用: ']
     },
     ja: {
@@ -112,12 +119,13 @@
       copied: 'コピー完了！',
       listen: '読み上げ',
       stop: '停止',
-      replace: '⇄ 置換',
-      undo: '↺ 元に戻す',
+      explain: 'わかりやすく解説',
+      explaining: 'わかりやすく解説中...',
       summary: '要約',
       fullText: '↩ 全文に戻る',
       summarizing: '要約を作成中...',
       badge: '💡 主なポイント',
+      explainBadge: '🧠 直感的な解説',
       prefixes: ['🎯 コア概念: ', '⚙️ 動作の仕組み: ', '💡 実用的なメリット: ']
     },
     pt: {
@@ -125,12 +133,13 @@
       copied: 'Copiado!',
       listen: 'Ouvir',
       stop: 'Parar',
-      replace: '⇄ Substituir',
-      undo: '↺ Desfazer',
+      explain: 'Explicar',
+      explaining: 'Explicando de forma simples...',
       summary: 'Resumo',
       fullText: '↩ Texto Completo',
       summarizing: 'Gerando resumo...',
       badge: '💡 Pontos Principais',
+      explainBadge: '🧠 Explicação Descomplicada',
       prefixes: ['🎯 Conceito Principal: ', '⚙️ Como funciona: ', '💡 Benefício Prático: ']
     },
     ru: {
@@ -138,12 +147,13 @@
       copied: 'Скопировано!',
       listen: 'Слушать',
       stop: 'Стоп',
-      replace: '⇄ Заменить',
-      undo: '↺ Отменить',
+      explain: 'Объяснить просто',
+      explaining: 'Объяснение простыми словами...',
       summary: 'Кратко',
       fullText: '↩ Полный текст',
       summarizing: 'Создание резюме...',
       badge: '💡 Главные тезисы',
+      explainBadge: '🧠 Простое объяснение',
       prefixes: ['🎯 Главная суть: ', '⚙️ Как это работает: ', '💡 Практическая польза: ']
     },
     ur: {
@@ -151,12 +161,13 @@
       copied: 'کاپی ہو گیا!',
       listen: 'سنیں',
       stop: 'روکیں',
-      replace: '⇄ تبدیل کریں',
-      undo: '↺ واپس کریں',
+      explain: 'آسان وضاحت',
+      explaining: 'آسان الفاظ میں سمجھایا جا رہا ہے...',
       summary: 'خلاصہ',
       fullText: '↩ اصل متن',
       summarizing: 'خلاصہ تیار کیا جا رہا ہے...',
       badge: '💡 اہم نکات',
+      explainBadge: '🧠 آسان وضاحت',
       prefixes: ['🎯 بنیادی تصور: ', '⚙️ یہ کیسے کام کرتا ہے: ', '💡 عملی فائدہ: ']
     },
     en: {
@@ -164,12 +175,13 @@
       copied: 'Copied!',
       listen: 'Listen',
       stop: 'Stop',
-      replace: '⇄ Replace',
-      undo: '↺ Undo',
+      explain: 'Explain',
+      explaining: 'Explaining in simple terms...',
       summary: 'Summary',
       fullText: '↩ Full Text',
       summarizing: 'Summarizing content...',
       badge: '💡 Key Takeaways',
+      explainBadge: '🧠 Intuitive Breakdown',
       prefixes: ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: ']
     }
   };
@@ -308,7 +320,7 @@
     };
   }
 
-  // Core LWS Persona & Quality Principles per language
+  // Core LWS Persona & Quality Principles per language (Summarization & Translation)
   const LWS_SYSTEM_DIRECTIVES = {
     bn: [
       'আপনি সুমিত সাহা (Learn with Sumit)-এর মতো অত্যন্ত আকর্ষণীয়, বন্ধুত্বপূর্ণ ও প্রাঞ্জল কথ্য বাংলায় টেকনিক্যাল কনসেপ্ট বুঝিয়ে দেন।',
@@ -334,6 +346,42 @@
     ]
   };
 
+  // Core LWS Explanation Directives per language (Deep pedagogical intuition with real-world analogies)
+  const EXPLAIN_SYSTEM_DIRECTIVES = {
+    bn: [
+      'আপনি সুমিত সাহা (Learn with Sumit)-এর মতো অত্যন্ত আকর্ষণীয়, আন্তরিক ও প্রাঞ্জল কথ্য বাংলায় জটিল টেকনিক্যাল বিষয় ও সাধারণ কনসেপ্ট একদম সহজ করে বুঝিয়ে দেন।',
+      'যেকোনো বিষয়কে সাধারণ মানুষের বোধগম্য ৩টি আকর্ষণীয় ও গোছানো সেকশনে উপস্থাপন করুন:',
+      '1. 💡 সহজ কথায়: কনসেপ্টটি আসলে কী, কোনো কঠিন টেকনিক্যাল জার্গন ছাড়া একদম সহজ ভাষায় ১-২ লাইনে বুঝিয়ে বলুন।',
+      '2. 🔍 বাস্তব জীবনের উদাহরণ: সাধারণ জীবনের একটি চমৎকার বাস্তব উদাহরণ বা রূপক (Real-world Analogy) দিয়ে বুঝিয়ে দিন যাতে বিষয়টি সাথে সাথে মাথায় গেঁথে যায় (যেমন রেস্টুরেন্টের কিচেন, ট্রাফিক সিস্টেম, বিদ্যুতের সুইচবোর্ড বা দৈনন্দিন জীবনের রূপক)।',
+      '3. ⚡ কেন এটি গুরুত্বপূর্ণ: প্রজেক্টে বা বাস্তবিক কাজে এটি ব্যবহারের মূল সুবিধা ও প্রয়োজনীয়তা কী।',
+      'প্রোগ্রামিং পরিভাষাগুলো (যেমন React, API, DOM, State ইত্যাদি) হুবহু ইংরেজিতে রাখুন এবং বর্ণনায় ডিক্লারেটিভ ক্রিয়াপদ ব্যবহার করুন।'
+    ],
+    hi: [
+      'आप सुमित साहा (Learn with Sumit) की तरह सरल, रोचक और वास्तविक जीवन के उदाहरणों (Analogies) के साथ तकनीकी अवधारणाओं को गहराई से समझाते हैं।',
+      'प्रस्तुति को 3 स्पष्ट खंडों में रखें:',
+      '1. 💡 सरल शब्दों में: यह क्या है, बिना किसी जटिलता के आसान 1-2 पंक्तियों में।',
+      '2. 🔍 वास्तविक जीवन का उदाहरण: एक सहज और सटीक दैनिक उदाहरण/एनालॉजी जिससे अवधारणा तुरंत समझ आ जाए।',
+      '3. ⚡ यह क्यों महत्वपूर्ण है: वास्तविक काम और विकास में इसका मुख्य लाभ और आवश्यकता।',
+      'तकनीकी शब्दों को मूल रूप में रखें और व्यावहारिक भाषा का प्रयोग करें।'
+    ],
+    es: [
+      'Eres un educador técnico magistral que desglosa conceptos complejos usando analogías de la vida real con máxima claridad e intuición.',
+      'Estructura la explicación estrictamente en 3 secciones:',
+      '1. 💡 En Palabras Sencillas: Qué es exactamente el concepto en 1-2 oraciones claras y directas.',
+      '2. 🔍 Analogía de la Vida Real: Una metáfora cotidiana y vívida que hace que el concepto sea instantáneamente comprensible.',
+      '3. ⚡ Por Qué Es Importante: Su valor práctico y utilidad real.',
+      'Mantén los nombres técnicos y de código intactos en inglés.'
+    ],
+    en: [
+      'You are a world-class technical educator explaining complex engineering and general concepts with absolute clarity, intuitive insights, and memorable real-world analogies.',
+      'Structure the explanation strictly into 3 clear pedagogical sections:',
+      '1. 💡 In Plain Terms: What the concept actually is in 1-2 simple, jargon-free sentences.',
+      '2. 🔍 Real-World Analogy: A vivid, relatable everyday metaphor (e.g. restaurant kitchen, traffic system, electricity grid) that makes the concept click instantly.',
+      '3. ⚡ Why It Matters: The practical engineering value, performance impact, or real-world necessity.',
+      'Keep code identifiers and technical terms intact in English.'
+    ]
+  };
+
   const FEW_SHOT_EXEMPLARS = [
     {
       source: "React components receive data and return what should appear on the screen. You can pass them new data in response to an interaction, like when the user types into an input. React will then update the screen to match the new data.",
@@ -349,13 +397,18 @@
   /**
    * Generates a context-aware system prompt for Chrome Built-in LanguageModel / Summarizer.
    * @param {string} [targetLang='bn']
-   * @param {'translation'|'summarization'} [taskType='summarization']
+   * @param {'translation'|'summarization'|'explanation'} [taskType='summarization']
    * @param {'tech'|'news'|'general'} [context='tech']
    * @returns {string}
    */
   function buildSystemPrompt(targetLang = 'bn', taskType = 'summarization', context = 'tech') {
     const ctx = CONTEXTUAL_CONFIG[context] ? context : 'tech';
     const i18n = getI18nLabels(targetLang, ctx);
+
+    if (taskType === 'explanation') {
+      const directives = EXPLAIN_SYSTEM_DIRECTIVES[targetLang] || EXPLAIN_SYSTEM_DIRECTIVES.en;
+      return directives.join(' ');
+    }
 
     if (taskType === 'summarization') {
       if (ctx === 'news') {
@@ -394,12 +447,23 @@
    * @param {string} text
    * @param {string} [targetLang='bn']
    * @param {'tech'|'news'|'general'} [context=null]
+   * @param {'summarization'|'explanation'} [taskType='summarization']
    * @returns {string}
    */
-  function buildUserPrompt(text, targetLang = 'bn', context = null) {
+  function buildUserPrompt(text, targetLang = 'bn', context = null, taskType = 'summarization') {
     const ctx = context || detectContext(text);
     const i18n = getI18nLabels(targetLang, ctx);
     const markers = i18n.prefixes.map((p) => p.replace(/:\s*$/, '')).join(', ');
+
+    if (taskType === 'explanation') {
+      if (targetLang === 'bn') {
+        return `নিচের বিষয়টি সুমিত সাহা (LWS) স্টাইলে একদম সহজ কথায়, একটি দারুণ বাস্তব জীবনের উদাহরণ (Analogy) দিয়ে এবং কেন এটি গুরুত্বপূর্ণ তা ৩টি সেকশনে (💡 সহজ কথায়, 🔍 বাস্তব জীবনের উদাহরণ, ⚡ কেন এটি গুরুত্বপূর্ণ) বুঝিয়ে দিন:\n\n${text}`;
+      }
+      if (targetLang === 'hi') {
+        return `निम्नलिखित विषय को सरल भाषा में, एक सटीक वास्तविक जीवन के उदाहरण (Analogy) के साथ 3 खंडों (💡 सरल शब्दों में, 🔍 वास्तविक जीवन का उदाहरण, ⚡ यह क्यों महत्वपूर्ण है) में समझाइए:\n\n${text}`;
+      }
+      return `Explain the following concept in intuitive terms with a memorable real-world analogy in 3 sections (💡 In Plain Terms, 🔍 Real-World Analogy, ⚡ Why It Matters):\n\n${text}`;
+    }
 
     if (ctx === 'news') {
       if (targetLang === 'bn') {
@@ -435,6 +499,7 @@
     getI18nLabels,
     CONTEXTUAL_CONFIG,
     I18N_LABELS,
-    LWS_SYSTEM_DIRECTIVES
+    LWS_SYSTEM_DIRECTIVES,
+    EXPLAIN_SYSTEM_DIRECTIVES
   };
 });

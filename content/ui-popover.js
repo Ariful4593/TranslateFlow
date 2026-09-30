@@ -14,11 +14,10 @@ window.UIPopover = (function () {
   let currentTranslatedText = '';
   let currentSourceLang = 'en';
   let currentTargetLang = 'bn';
-  let isReplacedInPage = false;
-  let replacedOriginalNode = null;
-  let replacedNewNode = null;
   let isShowingSummary = false;
   let currentSummaryData = null;
+  let isShowingExplanation = false;
+  let currentExplanationData = null;
   let currentFormattedTranslationHtml = '';
   let isCardExpanded = false;
 
@@ -615,6 +614,97 @@ window.UIPopover = (function () {
           margin: 0;
         }
 
+        /* Explanation view styling */
+        .bt-explain-container {
+          animation: btFadeIn 0.2s ease;
+          white-space: normal !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .bt-explain-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin: 0 0 10px 0;
+          padding: 0;
+        }
+
+        .bt-explain-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 11.5px;
+          font-weight: 600;
+          color: #7c3aed;
+          background: rgba(124, 58, 237, 0.09);
+          padding: 2px 8px;
+          border-radius: 5px;
+          line-height: 1.4;
+        }
+
+        .bt-explain-engine {
+          font-size: 10px;
+          color: var(--bt-text-muted);
+          background: rgba(0, 0, 0, 0.04);
+          padding: 2px 6px;
+          border-radius: 4px;
+          line-height: 1.3;
+        }
+
+        .bt-explain-body {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .bt-explain-section {
+          background: rgba(0, 0, 0, 0.02);
+          border: 1px solid var(--bt-border);
+          border-radius: 8px;
+          padding: 8px 10px;
+          transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .bt-explain-section:hover {
+          background: rgba(0, 0, 0, 0.035);
+          border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .bt-explain-sec-title {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--bt-text);
+          margin-bottom: 4px;
+        }
+
+        .bt-explain-icon {
+          font-size: 14px;
+          line-height: 1;
+        }
+
+        .bt-explain-sec-content {
+          font-size: 13px;
+          line-height: 1.6;
+          color: var(--bt-text);
+          white-space: normal;
+        }
+
+        .bt-explain-loading {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          color: var(--bt-text-muted);
+          padding: 4px 0;
+          margin: 0;
+        }
+
         @keyframes btShimmer {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
@@ -671,8 +761,9 @@ window.UIPopover = (function () {
             <span>শুনুন</span>
           </button>
 
-          <button class="bt-tool-btn" id="bt-replace" title="পৃষ্ঠায় টেক্সট প্রতিস্থাপন করুন">
-            <span>⇄ প্রতিস্থাপন</span>
+          <button class="bt-tool-btn" id="bt-explain" title="সহজ ভাষায় বিস্তারিত ব্যাখ্যা ও বাস্তব উদাহরণ দেখুন">
+            <svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-1.3l-.85-.6C7.8 13.16 7 11.42 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.42-.8 4.16-2.15 5.1z"/></svg>
+            <span id="bt-explain-text">সহজ ব্যাখ্যা</span>
           </button>
 
           <button class="bt-tool-btn" id="bt-summarize" title="সহজ ভাষায় মূল সারসংক্ষেপ দেখুন">
@@ -736,9 +827,11 @@ window.UIPopover = (function () {
     // Copy button
     shadowRoot.getElementById('bt-copy').addEventListener('click', async (e) => {
       e.stopPropagation();
-      const textToCopy = isShowingSummary && currentSummaryData?.plainText
-        ? currentSummaryData.plainText
-        : currentTranslatedText;
+      const textToCopy = (isShowingExplanation && currentExplanationData?.plainText)
+        ? currentExplanationData.plainText
+        : ((isShowingSummary && currentSummaryData?.plainText)
+            ? currentSummaryData.plainText
+            : currentTranslatedText);
 
       if (!textToCopy) return;
 
@@ -754,19 +847,24 @@ window.UIPopover = (function () {
     // Listen / Speak button (Natural Voice TTS)
     shadowRoot.getElementById('bt-speak').addEventListener('click', (e) => {
       e.stopPropagation();
-      const textToSpeak = isShowingSummary && currentSummaryData?.plainText
-        ? currentSummaryData.plainText
-        : currentTranslatedText;
+      const textToSpeak = (isShowingExplanation && currentExplanationData?.plainText)
+        ? currentExplanationData.plainText
+        : ((isShowingSummary && currentSummaryData?.plainText)
+            ? currentSummaryData.plainText
+            : currentTranslatedText);
 
       if (!textToSpeak) return;
       playNaturalTTS(textToSpeak, currentTargetLang);
     });
 
-    // Replace in page toggle
-    shadowRoot.getElementById('bt-replace').addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleReplaceInPage();
-    });
+    // Explain button click
+    const explainBtn = shadowRoot.getElementById('bt-explain');
+    if (explainBtn) {
+      explainBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleExplain();
+      });
+    }
 
     // Summarize button click
     const sumBtn = shadowRoot.getElementById('bt-summarize');
@@ -1390,10 +1488,10 @@ window.UIPopover = (function () {
     const i18n = window.PromptHarness?.getI18nLabels
       ? window.PromptHarness.getI18nLabels(currentTargetLang)
       : (currentTargetLang === 'bn'
-          ? { copy: 'কপি', listen: 'শুনুন', replace: '⇄ প্রতিস্থাপন', summary: 'সারসংক্ষেপ', fullText: '↩ মূল অনুবাদ' }
+          ? { copy: 'কপি', listen: 'শুনুন', explain: 'সহজ ব্যাখ্যা', summary: 'সারসংক্ষেপ', fullText: '↩ মূল অনুবাদ' }
           : (currentTargetLang === 'hi'
-              ? { copy: 'कॉपी', listen: 'सुनें', replace: '⇄ बदलें', summary: 'सारांश', fullText: '↩ मूल अनुवाद' }
-              : { copy: 'Copy', listen: 'Listen', replace: '⇄ Replace', summary: 'Summary', fullText: '↩ Full Text' }));
+              ? { copy: 'कॉपी', listen: 'सुनें', explain: 'सरल व्याख्या', summary: 'सारांश', fullText: '↩ मूल अनुवाद' }
+              : { copy: 'Copy', listen: 'Listen', explain: 'Explain', summary: 'Summary', fullText: '↩ Full Text' }));
 
     const copyBtn = shadowRoot.getElementById('bt-copy');
     if (copyBtn) {
@@ -1410,9 +1508,15 @@ window.UIPopover = (function () {
       speakBtn.title = i18n.listen;
     }
 
-    const replaceBtn = shadowRoot.getElementById('bt-replace');
-    if (replaceBtn) {
-      replaceBtn.innerHTML = `<span>${i18n.replace}</span>`;
+    // Reset explain button & state
+    isShowingExplanation = false;
+    currentExplanationData = null;
+    const explainBtn = shadowRoot.getElementById('bt-explain');
+    if (explainBtn) {
+      explainBtn.classList.remove('active');
+      const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
+      if (expSpan) expSpan.textContent = i18n.explain || 'সহজ ব্যাখ্যা';
+      explainBtn.title = i18n.explain || 'সহজ ব্যাখ্যা';
     }
 
     // Reset summary state
@@ -1666,6 +1770,17 @@ window.UIPopover = (function () {
     currentTranslatedText = translatedText;
     isShowingSummary = false;
     currentSummaryData = null;
+    isShowingExplanation = false;
+    currentExplanationData = null;
+
+    const explainBtn = shadowRoot.getElementById('bt-explain');
+    if (explainBtn) {
+      explainBtn.classList.remove('active');
+      const isEn = currentTargetLang === 'en';
+      const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
+      if (expSpan) expSpan.textContent = isEn ? 'Explain' : 'সহজ ব্যাখ্যা';
+      explainBtn.title = isEn ? 'Explain concept simply' : 'সহজ ভাষায় বিস্তারিত ব্যাখ্যা ও বাস্তব উদাহরণ দেখুন';
+    }
 
     const sumBtn = shadowRoot.getElementById('bt-summarize');
     if (sumBtn) {
@@ -1734,43 +1849,143 @@ window.UIPopover = (function () {
    * Replaces selected text in the actual webpage DOM with the translation.
    * Clicking again restores the original text.
    */
-  function toggleReplaceInPage() {
-    const replaceBtn = shadowRoot.getElementById('bt-replace');
-    if (!activeSelectionRange || !currentTranslatedText) return;
+  /**
+   * Toggles between full translation and an easy-to-understand explanation with real-world analogies.
+   */
+  async function toggleExplain() {
+    const explainBtn = shadowRoot.getElementById('bt-explain');
+    const sumBtn = shadowRoot.getElementById('bt-summarize');
+    const contentBox = shadowRoot.getElementById('bt-content');
+    if (!contentBox) return;
 
-    const isEn = currentTargetLang === 'en';
+    const i18n = window.PromptHarness?.getI18nLabels
+      ? window.PromptHarness.getI18nLabels(currentTargetLang)
+      : (currentTargetLang === 'bn'
+          ? { explain: 'সহজ ব্যাখ্যা', fullText: '↩ মূল অনুবাদ', explaining: 'সহজ ভাষায় বুঝিয়ে দেওয়া হচ্ছে...', explainBadge: '🧠 সহজ ভাষায় বিশ্লেষণ' }
+          : (currentTargetLang === 'hi'
+              ? { explain: 'सरल व्याख्या', fullText: '↩ मूल अनुवाद', explaining: 'सरल भाषा में समझ रहे हैं...', explainBadge: '🧠 सरल भाषा में व्याख्या' }
+              : { explain: 'Explain', fullText: '↩ Full Text', explaining: 'Explaining in simple terms...', explainBadge: '🧠 Intuitive Breakdown' }));
+
+    // If currently showing explanation, restore full translation
+    if (isShowingExplanation) {
+      isShowingExplanation = false;
+      if (explainBtn) {
+        explainBtn.classList.remove('active');
+        const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
+        if (expSpan) expSpan.textContent = i18n.explain || 'সহজ ব্যাখ্যা';
+        explainBtn.title = i18n.explain || 'সহজ ব্যাখ্যা';
+      }
+      safeViewTransition(() => {
+        contentBox.style.animation = 'none';
+        void contentBox.offsetWidth;
+        contentBox.style.animation = 'btFadeIn 0.2s ease';
+        contentBox.innerHTML = currentFormattedTranslationHtml || currentTranslatedText;
+      });
+      return;
+    }
+
+    // If summary was showing, reset summary
+    if (isShowingSummary) {
+      isShowingSummary = false;
+      if (sumBtn) {
+        sumBtn.classList.remove('active');
+        const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
+        if (sumSpan) sumSpan.textContent = i18n.summary || 'সারসংক্ষেপ';
+        sumBtn.title = i18n.summary || 'সারসংক্ষেপ';
+      }
+    }
+
+    // Switch to explanation view
+    if (!currentTranslatedText && !originalSelectedText) return;
+
+    isShowingExplanation = true;
+    if (explainBtn) {
+      explainBtn.classList.add('active');
+      const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
+      if (expSpan) expSpan.textContent = i18n.fullText || '↩ মূল অনুবাদ';
+      explainBtn.title = i18n.fullText || '↩ মূল অনুবাদ';
+    }
+
+    // If already generated for this active selection, render instantly
+    if (currentExplanationData && currentExplanationData.html) {
+      safeViewTransition(() => {
+        contentBox.style.animation = 'none';
+        void contentBox.offsetWidth;
+        contentBox.style.animation = 'btFadeIn 0.2s ease';
+        contentBox.innerHTML = currentExplanationData.html;
+      });
+      return;
+    }
+
+    // Show shimmering loading skeleton
+    contentBox.innerHTML = `
+      <div class="bt-explain-loading">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#7c3aed" style="animation: btPulse 1.2s infinite;"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-1.3l-.85-.6C7.8 13.16 7 11.42 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.42-.8 4.16-2.15 5.1z"/></svg>
+        <span>${i18n.explaining || 'সহজ ভাষায় বুঝিয়ে দেওয়া হচ্ছে...'}</span>
+      </div>
+      <div class="bt-loading-skeleton" style="margin-top: 8px;">
+        <div class="bt-skeleton-line"></div>
+        <div class="bt-skeleton-line"></div>
+        <div class="bt-skeleton-line short"></div>
+      </div>
+    `;
 
     try {
-      if (!isReplacedInPage) {
-        // Perform replacement
-        const span = document.createElement('span');
-        span.className = 'bt-inline-translated-text';
-        span.style.cssText =
-          'background-color: rgba(37, 99, 235, 0.08); border-bottom: 1.5px dashed #2563eb; color: inherit; transition: background 0.2s;';
-        span.title = isEn ? `Original: ${originalSelectedText}` : `আসল লেখা: ${originalSelectedText}`;
-        span.textContent = currentTranslatedText;
-
-        activeSelectionRange.deleteContents();
-        activeSelectionRange.insertNode(span);
-
-        replacedNewNode = span;
-        isReplacedInPage = true;
-        if (replaceBtn) replaceBtn.innerHTML = isEn ? '<span>↺ Undo</span>' : '<span>↺ পূর্বাবস্থায় ফিরুন</span>';
-        showToast(isEn ? 'Replaced in page' : 'পৃষ্ঠায় প্রতিস্থাপিত');
+      if (window.SummarizerEngine?.explain) {
+        currentExplanationData = await window.SummarizerEngine.explain(
+          originalSelectedText,
+          currentTranslatedText,
+          currentTargetLang
+        );
       } else {
-        // Revert to original
-        if (replacedNewNode && replacedNewNode.parentNode) {
-          const textNode = document.createTextNode(originalSelectedText);
-          replacedNewNode.parentNode.replaceChild(textNode, replacedNewNode);
-          replacedNewNode = null;
-        }
-        isReplacedInPage = false;
-        if (replaceBtn) replaceBtn.innerHTML = isEn ? '<span>⇄ Replace</span>' : '<span>⇄ প্রতিস্থাপন</span>';
-        showToast(isEn ? 'Original restored' : 'আসল লেখা ফেরত আনা হয়েছে');
+        throw new Error('Explain engine not available');
+      }
+
+      if (isShowingExplanation) {
+        safeViewTransition(() => {
+          contentBox.style.animation = 'none';
+          void contentBox.offsetWidth;
+          contentBox.style.animation = 'btFadeIn 0.25s ease';
+          contentBox.innerHTML = currentExplanationData.html;
+        });
       }
     } catch (err) {
-      console.warn('Replace in page failed:', err);
-      showToast(isEn ? 'Replace failed' : 'প্রতিস্থাপন সম্ভব হয়নি');
+      console.warn('Explain error:', err);
+      if (isShowingExplanation) {
+        const fallback = window.SummarizerEngine?.smartExplain
+          ? window.SummarizerEngine.smartExplain(currentTranslatedText || originalSelectedText, currentTargetLang)
+          : { concept: currentTranslatedText, analogy: '', whyItMatters: '' };
+
+        const isBn = currentTargetLang === 'bn';
+        const isHi = currentTargetLang === 'hi';
+        const sections = [
+          { icon: '💡', title: isBn ? 'সহজ কথায়' : (isHi ? 'सरल शब्दों में' : 'In Plain Terms'), content: fallback.concept },
+          { icon: '🔍', title: isBn ? 'বাস্তব জীবনের উদাহরণ' : (isHi ? 'वास्तविक जीवन का उदाहरण' : 'Real-World Analogy'), content: fallback.analogy },
+          { icon: '⚡', title: isBn ? 'কেন এটি গুরুত্বপূর্ণ' : (isHi ? 'यह क्यों महत्वपूर्ण है' : 'Why It Matters'), content: fallback.whyItMatters }
+        ];
+
+        const badge = i18n.explainBadge || '🧠 সহজ ভাষায় বিশ্লেষণ';
+        const itemsHtml = sections
+          .map((sec) => `
+            <div class="bt-explain-section">
+              <div class="bt-explain-sec-title"><span class="bt-explain-icon">${sec.icon}</span><span>${sec.title}</span></div>
+              <div class="bt-explain-sec-content">${sec.content}</div>
+            </div>
+          `.trim())
+          .join('');
+
+        const html = `<div class="bt-explain-container"><div class="bt-explain-header"><span class="bt-explain-badge">${badge}</span><span class="bt-explain-engine">Smart Explainer</span></div><div class="bt-explain-body">${itemsHtml}</div></div>`.trim();
+
+        currentExplanationData = {
+          sections,
+          html,
+          plainText: `${badge}:\n` + sections.map(s => `${s.icon} ${s.title}: ${s.content}`).join('\n\n')
+        };
+
+        safeViewTransition(() => {
+          contentBox.innerHTML = html;
+        });
+      }
     }
   }
 
@@ -1779,6 +1994,7 @@ window.UIPopover = (function () {
    */
   async function toggleSummarize() {
     const sumBtn = shadowRoot.getElementById('bt-summarize');
+    const explainBtn = shadowRoot.getElementById('bt-explain');
     const contentBox = shadowRoot.getElementById('bt-content');
     if (!contentBox) return;
 
@@ -1787,7 +2003,7 @@ window.UIPopover = (function () {
       : (currentTargetLang === 'bn'
           ? { summary: 'সারসংক্ষেপ', fullText: '↩ মূল অনুবাদ', summarizing: 'সহজ ভাষায় সারসংক্ষেপ তৈরি হচ্ছে...', badge: '💡 সহজ ভাষায় সারসংক্ষেপ' }
           : (currentTargetLang === 'hi'
-              ? { summary: 'सारांश', fullText: '↩ मूल अनुवाद', summarizing: 'सरल भाषा में सारांश तैयार हो रहा है...', badge: '💡 मुख्य बातें (सरल सारांश)' }
+              ? { summary: 'सारांश', fullText: '↩ মূল अनुवाद', summarizing: 'सरल भाषा में सारांश तैयार हो रहा है...', badge: '💡 मुख्य बातें (सरल सारांश)' }
               : { summary: 'Summary', fullText: '↩ Full Text', summarizing: 'Summarizing content...', badge: '💡 Key Takeaways' }));
 
     // If currently showing summary, restore full translation
@@ -1806,6 +2022,17 @@ window.UIPopover = (function () {
         contentBox.innerHTML = currentFormattedTranslationHtml || currentTranslatedText;
       });
       return;
+    }
+
+    // If explanation was showing, reset explanation
+    if (isShowingExplanation) {
+      isShowingExplanation = false;
+      if (explainBtn) {
+        explainBtn.classList.remove('active');
+        const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
+        if (expSpan) expSpan.textContent = i18n.explain || 'সহজ ব্যাখ্যা';
+        explainBtn.title = i18n.explain || 'সহজ ব্যাখ্যা';
+      }
     }
 
     // Switch to summary view
