@@ -1959,9 +1959,9 @@ window.UIPopover = (function () {
         const isBn = currentTargetLang === 'bn';
         const isHi = currentTargetLang === 'hi';
         const sections = [
-          { icon: '💡', title: isBn ? 'সহজ কথায়' : (isHi ? 'सरल शब्दों में' : 'In Plain Terms'), content: fallback.concept },
-          { icon: '🔍', title: isBn ? 'বাস্তব জীবনের উদাহরণ' : (isHi ? 'वास्तविक जीवन का उदाहरण' : 'Real-World Analogy'), content: fallback.analogy },
-          { icon: '⚡', title: isBn ? 'কেন এটি গুরুত্বপূর্ণ' : (isHi ? 'यह क्यों महत्वपूर्ण है' : 'Why It Matters'), content: fallback.whyItMatters }
+          { icon: '💡', title: isBn ? 'সহজ ভাষায় মূল ধারণা' : (isHi ? 'सरल भाषा में मूल विचार' : 'Core Concept in Plain Terms'), content: fallback.concept },
+          { icon: '🔍', title: isBn ? 'বাস্তব জীবনের উদাহরণ (Analogy)' : (isHi ? 'वास्तविक जीवन का उदाहरण (Analogy)' : 'Real-World Analogy'), content: fallback.analogy },
+          { icon: '⚡', title: isBn ? 'এটি আমাদের কী কাজে লাগে' : (isHi ? 'यह हमारे किस काम आता है' : 'Why It Matters'), content: fallback.whyItMatters }
         ];
 
         const badge = i18n.explainBadge || '🧠 সহজ ভাষায় বিশ্লেষণ';
