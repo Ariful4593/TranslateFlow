@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TranslateFlow: AI Web & Inline Translator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Instant, developer-friendly inline web translation powered by Chrome Built-in AI. Preserves code, APIs, and technical terms.",
   "icons": {
     "16": "icons/icon-16.png",
