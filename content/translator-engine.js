@@ -147,15 +147,16 @@ window.TranslatorEngine = (function () {
 
     const normalized = rawText.replace(/\r\n/g, '\n').trim();
 
-    // Auto-detect if selected text is already in the target language (default: Bengali)
-    const preferredTarget = options.targetLang || 'bn';
-    const isBengali = window.TermGuardian && typeof window.TermGuardian.isBengaliText === 'function'
-      ? window.TermGuardian.isBengaliText(normalized)
-      : /[\u0980-\u09FF]/.test(normalized);
+    // Auto-detect source language dynamically from text scripts (Hindi, Bengali, Arabic, etc.)
+    const detectedSource = window.TermGuardian?.detectSourceLanguage
+      ? window.TermGuardian.detectSourceLanguage(normalized)
+      : (window.TermGuardian?.isBengaliText?.(normalized) ? 'bn' : 'en');
 
-    const isSourceTargetMatch = (preferredTarget === 'bn' && isBengali);
-    const sourceLang = options.sourceLang || (isSourceTargetMatch ? preferredTarget : (isBengali ? 'bn' : 'en'));
-    const targetLang = isSourceTargetMatch ? 'en' : preferredTarget;
+    const preferredTarget = options.targetLang || 'bn';
+    const isSourceTargetMatch = (detectedSource === preferredTarget);
+
+    const sourceLang = options.sourceLang || (isSourceTargetMatch ? preferredTarget : detectedSource);
+    const targetLang = isSourceTargetMatch ? (preferredTarget === 'en' ? 'bn' : 'en') : preferredTarget;
 
     // Check if multiple paragraphs are selected (separated by blank lines, protected from recursive loops)
     if (!options._isSubChunk && /\n\s*\n/.test(normalized)) {

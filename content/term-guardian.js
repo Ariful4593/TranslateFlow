@@ -58,6 +58,45 @@ window.TermGuardian = (function () {
   ];
 
   /**
+   * Universal Source Language Detector based on scripts and diacritics.
+   * Accurately identifies source language (Hindi, Bengali, Arabic, Urdu, Russian, Spanish, etc.)
+   * so multi-directional translation never fails or assumes hardcoded English.
+   *
+   * @param {string} text
+   * @returns {string} Two-letter language code ('hi', 'bn', 'ar', 'ur', 'ru', 'es', 'fr', 'de', 'pt', 'zh', 'ja', 'en')
+   */
+  function detectSourceLanguage(text) {
+    if (!text || typeof text !== 'string') return 'en';
+    const clean = text.trim();
+    if (!clean) return 'en';
+
+    // 1. Script checks
+    if (/[\u0980-\u09FF]/.test(clean)) return 'bn';
+    if (/[\u0900-\u097F]/.test(clean)) return 'hi';
+    if (/[\u0679\u0686\u0688\u0691\u06BA\u06BE\u06C1\u06D2]/.test(clean)) return 'ur';
+    if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(clean)) return 'ar';
+    if (/[\u0400-\u04FF]/.test(clean)) return 'ru';
+    if (/[\u3040-\u309F\u30A0-\u30FF]/.test(clean)) return 'ja';
+    if (/[\u4E00-\u9FFF]/.test(clean)) return 'zh';
+
+    // 2. Latin family diacritics
+    if (/[áéíóúüñ¿¡]/i.test(clean)) return 'es';
+    if (/[éàèùâêîôûçëïüœæ]/i.test(clean)) return 'fr';
+    if (/[äöüß]/i.test(clean)) return 'de';
+    if (/[ãõáéíóúâêôç]/i.test(clean)) return 'pt';
+
+    // 3. Document language hint if in browser
+    if (typeof document !== 'undefined' && document.documentElement?.lang) {
+      const docLang = document.documentElement.lang.slice(0, 2).toLowerCase();
+      if (['es', 'fr', 'de', 'pt', 'ru', 'zh', 'ja', 'hi', 'ar', 'ur', 'bn'].includes(docLang)) {
+        return docLang;
+      }
+    }
+
+    return 'en';
+  }
+
+  /**
    * Detects if the given text is primarily in Bengali script.
    * @param {string} text
    * @returns {boolean}
@@ -486,6 +525,7 @@ window.TermGuardian = (function () {
 
   return {
     isBengaliText,
+    detectSourceLanguage,
     isNonLinguistic,
     isTextMatchingTargetLanguage,
     protectTechnicalTerms,

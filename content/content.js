@@ -96,7 +96,7 @@
 
       if (currentSessionId !== activeTranslationSessionId) return;
       window.UIPopover.setDownloadProgress(1); // Complete
-      window.UIPopover.setContent(result.translatedText, result.engine, result.targetLang);
+      window.UIPopover.setContent(result.translatedText, result.engine, result.targetLang, result.sourceLang);
     } catch (err) {
       if (currentSessionId !== activeTranslationSessionId) return;
       console.error('Translation error:', err);

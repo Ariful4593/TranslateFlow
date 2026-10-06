@@ -1471,11 +1471,14 @@ window.UIPopover = (function () {
     isReplacedInPage = false;
 
     const activeTarget = userTargetLang || uiSettings.targetLanguage || 'bn';
-    const isBengali = window.TermGuardian?.isBengaliText ? window.TermGuardian.isBengaliText(text) : /[\u0980-\u09FF]/.test(text);
-    const isTargetMatch = (activeTarget === 'bn' && isBengali);
+    const detectedSource = window.TermGuardian?.detectSourceLanguage
+      ? window.TermGuardian.detectSourceLanguage(text)
+      : (window.TermGuardian?.isBengaliText?.(text) ? 'bn' : 'en');
 
-    currentSourceLang = isTargetMatch ? activeTarget : (isBengali ? 'bn' : 'en');
-    currentTargetLang = isTargetMatch ? 'en' : activeTarget;
+    const isTargetMatch = (activeTarget === detectedSource);
+
+    currentSourceLang = isTargetMatch ? activeTarget : detectedSource;
+    currentTargetLang = isTargetMatch ? (activeTarget === 'en' ? 'bn' : 'en') : activeTarget;
 
     const sourceLabel = LANGUAGE_NAMES[currentSourceLang] || currentSourceLang.toUpperCase();
     const targetLabel = LANGUAGE_NAMES[currentTargetLang] || currentTargetLang.toUpperCase();
@@ -1763,10 +1766,21 @@ window.UIPopover = (function () {
   /**
    * Updates card translation content (supports streaming updates).
    */
-  function setContent(translatedText, engineName = 'Chrome Native AI', targetLang = null) {
+  function setContent(translatedText, engineName = 'Chrome Native AI', targetLang = null, sourceLang = null) {
     if (targetLang) {
       currentTargetLang = targetLang;
     }
+    if (sourceLang) {
+      currentSourceLang = sourceLang;
+    }
+
+    const sourceLabel = LANGUAGE_NAMES[currentSourceLang] || currentSourceLang.toUpperCase();
+    const targetLabel = LANGUAGE_NAMES[currentTargetLang] || currentTargetLang.toUpperCase();
+    const dirEl = shadowRoot.getElementById('bt-lang-direction');
+    if (dirEl) {
+      dirEl.textContent = `${sourceLabel} ➔ ${targetLabel}`;
+    }
+
     currentTranslatedText = translatedText;
     isShowingSummary = false;
     currentSummaryData = null;
