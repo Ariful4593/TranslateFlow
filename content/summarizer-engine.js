@@ -294,13 +294,6 @@ window.SummarizerEngine = (function () {
   }
 
   /**
-   * Smart Pedagogical Analogy & Explanation Generator (Learn with Sumit - LWS Style)
-   * Converts complex technical concepts into intuitive real-world analogies:
-   * 1. 💡 সহজ কথায় (What it actually is in plain, friendly terms)
-   * 2. 🔍 বাস্তব জীবনের উদাহরণ / রূপক (Vivid relatable real-world analogy)
-   * 3. ⚡ কেন এটি গুরুত্বপূর্ণ (Practical benefit / engineering utility)
-   */
-  /**
    * Smart Dynamic Text Explanation & Concept Breakdown (Offline / Instant Fallback)
    * Dynamically breaks down any text (tech, news, law, finance, science, literature, general)
    * into 3 structured, fact-grounded pedagogical tiers directly from the source & translated sentences.
