@@ -73,6 +73,160 @@ window.TermGuardian = (function () {
   }
 
   /**
+   * Checks if text consists only of numbers, symbols, URLs, whitespace, or non-alphabetic noise.
+   * @param {string} text
+   * @returns {boolean}
+   */
+  function isNonLinguistic(text) {
+    if (!text || typeof text !== 'string') return true;
+    const clean = text.trim();
+    if (clean.length < 2) return true;
+
+    // 1. Pure URLs, emails, file paths, IP addresses
+    if (/^(https?:\/\/|ftp:\/\/|mailto:|file:\/\/|[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}|\/?[\w-]+\/[\w-]+\.[\w]+|\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)/i.test(clean)) return true;
+
+    // 2. Pure numbers, timestamps, hex codes, hashes, currency amounts, symbols
+    if (/^[\d\s.,:;/#$€£¥%+\-*=(){}\[\]<>_\/\\|'"`~^@!?&]+$/.test(clean)) return true;
+
+    // 3. Raw JSON object or array structure
+    if ((clean.startsWith('{') && clean.endsWith('}')) || (clean.startsWith('[') && clean.endsWith(']'))) {
+      try {
+        JSON.parse(clean);
+        return true;
+      } catch (e) {}
+    }
+
+    // 4. Pure alphabetic letter presence
+    const letters = clean.match(/[\p{L}\p{M}]/u);
+    if (!letters) return true;
+
+    return false;
+  }
+
+  /**
+   * Universal Multi-Script Language Classifier & Target Language Matcher.
+   * Determines whether the selected text is already in the user's chosen target language,
+   * enabling intelligent zero-nuisance dormancy on native websites across all 11+ languages.
+   *
+   * @param {string} text - The highlighted user text
+   * @param {string} targetLang - The user's active target language code ('bn', 'hi', 'es', 'fr', etc.)
+   * @returns {boolean} - Returns true if the text matches targetLang (safe to skip translation)
+   */
+  function isTextMatchingTargetLanguage(text, targetLang = 'bn') {
+    if (!text || typeof text !== 'string') return false;
+    if (isNonLinguistic(text)) return true; // Non-linguistic noise is always skipped
+
+    const clean = text.trim();
+    const totalChars = clean.length;
+    if (totalChars < 2) return true;
+
+    // Character frequency counters per script
+    const bnCount = (clean.match(/[\u0980-\u09FF]/g) || []).length;
+    const hiCount = (clean.match(/[\u0900-\u097F]/g) || []).length;
+    const arCount = (clean.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+    const ruCount = (clean.match(/[\u0400-\u04FF]/g) || []).length;
+    const zhCount = (clean.match(/[\u4E00-\u9FFF\u3400-\u4DBF]/g) || []).length;
+    const jaCount = (clean.match(/[\u3040-\u309F\u30A0-\u30FF]/g) || []).length;
+    const latinCount = (clean.match(/[a-zA-Z\u00C0-\u024F]/g) || []).length;
+
+    const totalLetterCount = bnCount + hiCount + arCount + ruCount + zhCount + jaCount + latinCount;
+    if (totalLetterCount === 0) return true; // No recognized alphabetic letters
+
+    // 1. Bengali (bn)
+    if (targetLang === 'bn') {
+      if (bnCount > 0 && (bnCount / totalLetterCount >= 0.35 || bnCount >= latinCount)) {
+        return true; // Already Bengali
+      }
+      return false; // Foreign text (e.g. English) -> Translate to Bengali
+    }
+
+    // 2. Hindi (hi)
+    if (targetLang === 'hi') {
+      if (hiCount > 0 && (hiCount / totalLetterCount >= 0.35 || hiCount >= latinCount)) {
+        return true; // Already Hindi
+      }
+      return false; // Foreign text -> Translate to Hindi
+    }
+
+    // 3. Arabic (ar) or Urdu (ur)
+    if (targetLang === 'ar' || targetLang === 'ur') {
+      if (arCount > 0 && (arCount / totalLetterCount >= 0.35 || arCount >= latinCount)) {
+        return true; // Already Arabic / Urdu
+      }
+      return false;
+    }
+
+    // 4. Russian (ru)
+    if (targetLang === 'ru') {
+      if (ruCount > 0 && (ruCount / totalLetterCount >= 0.35 || ruCount >= latinCount)) {
+        return true; // Already Russian
+      }
+      return false;
+    }
+
+    // 5. Chinese (zh)
+    if (targetLang === 'zh') {
+      if (zhCount > 0 && (zhCount / totalLetterCount >= 0.35 || zhCount >= latinCount)) {
+        return true; // Already Chinese
+      }
+      return false;
+    }
+
+    // 6. Japanese (ja)
+    if (targetLang === 'ja') {
+      if ((jaCount > 0 || zhCount > 0) && ((jaCount + zhCount) / totalLetterCount >= 0.35)) {
+        return true; // Already Japanese
+      }
+      return false;
+    }
+
+    // 7. Latin-based languages (Spanish, French, German, Portuguese, English)
+    if (['es', 'fr', 'de', 'pt', 'en'].includes(targetLang)) {
+      // Check document declared language if in browser environment
+      const docLang = (typeof document !== 'undefined' && document.documentElement?.lang)
+        ? document.documentElement.lang.toLowerCase()
+        : '';
+
+      if (targetLang === 'es') {
+        const esDiacritics = (clean.match(/[áéíóúüñ¿¡]/gi) || []).length;
+        if (esDiacritics > 0 || (docLang.startsWith('es') && latinCount > 0 && bnCount === 0 && hiCount === 0 && arCount === 0)) {
+          return true; // Already Spanish
+        }
+      }
+
+      if (targetLang === 'fr') {
+        const frDiacritics = (clean.match(/[éàèùâêîôûçëïüœæ]/gi) || []).length;
+        if (frDiacritics > 0 || (docLang.startsWith('fr') && latinCount > 0 && bnCount === 0 && hiCount === 0 && arCount === 0)) {
+          return true; // Already French
+        }
+      }
+
+      if (targetLang === 'de') {
+        const deDiacritics = (clean.match(/[äöüß]/gi) || []).length;
+        if (deDiacritics > 0 || (docLang.startsWith('de') && latinCount > 0 && bnCount === 0 && hiCount === 0 && arCount === 0)) {
+          return true; // Already German
+        }
+      }
+
+      if (targetLang === 'pt') {
+        const ptDiacritics = (clean.match(/[ãõáéíóúâêôç]/gi) || []).length;
+        if (ptDiacritics > 0 || (docLang.startsWith('pt') && latinCount > 0 && bnCount === 0 && hiCount === 0 && arCount === 0)) {
+          return true; // Already Portuguese
+        }
+      }
+
+      if (targetLang === 'en') {
+        // If target is English and text is purely English/Latin on an English site
+        if (docLang.startsWith('en') && latinCount > 0 && bnCount === 0 && hiCount === 0 && arCount === 0 && ruCount === 0) {
+          return true; // Already English
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Masks technical terms, inline code, and file paths with unique placeholder tokens.
    * @param {string} text
    * @returns {{ maskedText: string, termsMap: Map<string, string> }}
@@ -332,6 +486,8 @@ window.TermGuardian = (function () {
 
   return {
     isBengaliText,
+    isNonLinguistic,
+    isTextMatchingTargetLanguage,
     protectTechnicalTerms,
     restoreTechnicalTerms,
     postProcessBengaliText

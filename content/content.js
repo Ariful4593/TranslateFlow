@@ -139,8 +139,16 @@
         return;
       }
 
-      // Check if text is only punctuation or numbers
-      if (!/[a-zA-Z\u0980-\u09FF]/.test(selectedText)) {
+      // 1. Skip non-linguistic noise (pure numbers, symbols, URLs, whitespace)
+      if (window.TermGuardian?.isNonLinguistic && window.TermGuardian.isNonLinguistic(selectedText)) {
+        return;
+      }
+
+      // 2. Smart Auto-Dormancy on Native Text:
+      // If the selected text is already in the user's chosen target language (e.g. Bangla text when target is Bangla,
+      // or Hindi text when target is Hindi), silently skip so native reading/copying on native sites is never interrupted.
+      const targetLang = userSettings.targetLanguage || 'bn';
+      if (window.TermGuardian?.isTextMatchingTargetLanguage && window.TermGuardian.isTextMatchingTargetLanguage(selectedText, targetLang)) {
         return;
       }
 
@@ -150,7 +158,7 @@
         if (userSettings.triggerMode === 'instant') {
           executeTranslation(selectedText, range);
         } else {
-          window.UIPopover.showTrigger(range, selectedText, userSettings.targetLanguage || 'bn');
+          window.UIPopover.showTrigger(range, selectedText, targetLang);
         }
       } catch (err) {
         console.warn('Could not read selection range:', err);
