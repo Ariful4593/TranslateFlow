@@ -113,17 +113,14 @@ benchmarks.forEach((bench) => {
   }
   fluencyScore = Math.max(0, fluencyScore);
 
-  // Rubric 4: LWS 3-Tier Structure Compliance (Max 20 pts)
+  // Rubric 4: Universal Summary Quality & Bullet Conciseness (Max 20 pts)
   let structureScore = 20;
-  const foundMarkers = [];
-  bench.expectedSummaryMarkers.forEach((marker) => {
-    const hasMarker = summaryPoints.some((pt) => pt.includes(marker));
-    if (hasMarker) {
-      foundMarkers.push(marker);
-    } else {
-      structureScore -= 7;
-    }
-  });
+  if (!summaryPoints || summaryPoints.length < 2) {
+    structureScore -= 10;
+  }
+  if (summaryPoints.some((pt) => pt.trim().length < 12)) {
+    structureScore -= 5;
+  }
   structureScore = Math.max(0, structureScore);
 
   // Composite Score
@@ -134,13 +131,13 @@ benchmarks.forEach((bench) => {
   if (!passed) hasFailures = true;
 
   console.log(`  > Cleaned Translation: "${cleanedTranslation.slice(0, 110)}..."`);
-  console.log(`  > LWS Summary Points: [${summaryPoints.length} points generated]`);
+  console.log(`  > Summary Points: [${summaryPoints.length} points generated]`);
   summaryPoints.forEach((pt) => console.log(`      ${pt}`));
   console.log(`  > Scorecard:`);
   console.log(`      • Term Preservation:       ${termScore}/30 pts ${missingTerms.length ? '(Missing: ' + missingTerms.join(', ') + ')' : '✓'}`);
   console.log(`      • Grammar & Verbs:         ${grammarScore}/25 pts ${foundForbidden.length ? '(Found: ' + foundForbidden.join(', ') + ')' : '✓'}`);
   console.log(`      • Naturalness & Fluency:   ${fluencyScore}/25 pts`);
-  console.log(`      • LWS 3-Tier Structure:    ${structureScore}/20 pts (${foundMarkers.join(', ')})`);
+  console.log(`      • Summary Quality:         ${structureScore}/20 pts (${summaryPoints.length} clean points)`);
   console.log(`  > Final Composite Score: ${totalScore}/100 [${passed ? 'PASS' : 'FAIL'}]\n`);
 });
 

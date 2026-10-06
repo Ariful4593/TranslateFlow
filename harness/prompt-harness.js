@@ -25,10 +25,10 @@
       explaining: 'সহজ ভাষায় বুঝিয়ে দেওয়া হচ্ছে...',
       summary: 'সারসংক্ষেপ',
       fullText: '↩ মূল অনুবাদ',
-      summarizing: 'সহজ ভাষায় সারসংক্ষেপ তৈরি হচ্ছে...',
-      badge: '💡 সহজ ভাষায় সারসংক্ষেপ',
+      summarizing: 'সারসংক্ষেপ তৈরি হচ্ছে...',
+      badge: '💡 সারসংক্ষেপ',
       explainBadge: '🧠 সহজ ভাষায় বিশ্লেষণ',
-      prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: ']
+      prefixes: ['• ', '• ', '• ']
     },
     hi: {
       copy: 'कॉपी',
@@ -39,10 +39,10 @@
       explaining: 'सरल भाषा में समझ रहे हैं...',
       summary: 'सारांश',
       fullText: '↩ मूल अनुवाद',
-      summarizing: 'सरल भाषा में सारांश तैयार हो रहा है...',
-      badge: '💡 मुख्य बातें (सरल सारांश)',
+      summarizing: 'सारांश तैयार हो रहा है...',
+      badge: '💡 सारांश',
       explainBadge: '🧠 सरल भाषा में व्याख्या',
-      prefixes: ['🎯 मुख्य विषय: ', '⚙️ यह कैसे काम करता है: ', '💡 व्यावहारिक लाभ: ']
+      prefixes: ['• ', '• ', '• ']
     },
     es: {
       copy: 'Copiar',
@@ -54,9 +54,9 @@
       summary: 'Resumen',
       fullText: '↩ Texto Original',
       summarizing: 'Generando resumen...',
-      badge: '💡 Puntos Clave',
+      badge: '💡 Resumen',
       explainBadge: '🧠 Explicación Didáctica',
-      prefixes: ['🎯 Concepto Clave: ', '⚙️ Cómo funciona: ', '💡 Beneficio Práctico: ']
+      prefixes: ['• ', '• ', '• ']
     },
     fr: {
       copy: 'Copier',
@@ -68,9 +68,9 @@
       summary: 'Résumé',
       fullText: '↩ Texte Complet',
       summarizing: 'Résumé en cours...',
-      badge: '💡 Points Clés',
+      badge: '💡 Résumé',
       explainBadge: '🧠 Explication Simple',
-      prefixes: ['🎯 Concept Clé: ', '⚙️ Fonctionnement: ', '💡 Avantage Pratique: ']
+      prefixes: ['• ', '• ', '• ']
     },
     de: {
       copy: 'Kopieren',
@@ -82,9 +82,9 @@
       summary: 'Zusammenfassung',
       fullText: '↩ Vollständiger Text',
       summarizing: 'Zusammenfassung wird erstellt...',
-      badge: '💡 Wichtigste Punkte',
+      badge: '💡 Zusammenfassung',
       explainBadge: '🧠 Einfache Erklärung',
-      prefixes: ['🎯 Kernkonzept: ', '⚙️ Funktionsweise: ', '💡 Praktischer Nutzen: ']
+      prefixes: ['• ', '• ', '• ']
     },
     ar: {
       copy: 'نسخ',
@@ -96,9 +96,9 @@
       summary: 'ملخص',
       fullText: '↩ النص الكامل',
       summarizing: 'جاري إنشاء الملخص...',
-      badge: '💡 أهم النقاط',
+      badge: '💡 ملخص',
       explainBadge: '🧠 شرح مبسط ومفصل',
-      prefixes: ['🎯 المفهوم الأساسي: ', '⚙️ كيف يعمل: ', '💡 الفائدة العملية: ']
+      prefixes: ['• ', '• ', '• ']
     },
     zh: {
       copy: '复制',
@@ -110,9 +110,9 @@
       summary: '要点摘要',
       fullText: '↩ 完整译文',
       summarizing: '正在生成摘要...',
-      badge: '💡 核心要点',
+      badge: '💡 要点摘要',
       explainBadge: '🧠 通俗原理解析',
-      prefixes: ['🎯 核心概念: ', '⚙️ 工作原理: ', '💡 实际应用: ']
+      prefixes: ['• ', '• ', '• ']
     },
     ja: {
       copy: 'コピー',
@@ -124,9 +124,9 @@
       summary: '要約',
       fullText: '↩ 全文に戻る',
       summarizing: '要約を作成中...',
-      badge: '💡 主なポイント',
+      badge: '💡 要約',
       explainBadge: '🧠 直感的な解説',
-      prefixes: ['🎯 コア概念: ', '⚙️ 動作の仕組み: ', '💡 実用的なメリット: ']
+      prefixes: ['• ', '• ', '• ']
     },
     pt: {
       copy: 'Copiar',
@@ -138,9 +138,9 @@
       summary: 'Resumo',
       fullText: '↩ Texto Completo',
       summarizing: 'Gerando resumo...',
-      badge: '💡 Pontos Principais',
+      badge: '💡 Resumo',
       explainBadge: '🧠 Explicação Descomplicada',
-      prefixes: ['🎯 Conceito Principal: ', '⚙️ Como funciona: ', '💡 Benefício Prático: ']
+      prefixes: ['• ', '• ', '• ']
     },
     ru: {
       copy: 'Копировать',
@@ -152,9 +152,9 @@
       summary: 'Кратко',
       fullText: '↩ Полный текст',
       summarizing: 'Создание резюме...',
-      badge: '💡 Главные тезисы',
+      badge: '💡 Кратко',
       explainBadge: '🧠 Простое объяснение',
-      prefixes: ['🎯 Главная суть: ', '⚙️ Как это работает: ', '💡 Практическая польза: ']
+      prefixes: ['• ', '• ', '• ']
     },
     ur: {
       copy: 'کاپی',
@@ -166,9 +166,9 @@
       summary: 'خلاصہ',
       fullText: '↩ اصل متن',
       summarizing: 'خلاصہ تیار کیا جا رہا ہے...',
-      badge: '💡 اہم نکات',
+      badge: '💡 خلاصہ',
       explainBadge: '🧠 آسان وضاحت',
-      prefixes: ['🎯 بنیادی تصور: ', '⚙️ یہ کیسے کام کرتا ہے: ', '💡 عملی فائدہ: ']
+      prefixes: ['• ', '• ', '• ']
     },
     en: {
       copy: 'Copy',
@@ -180,67 +180,31 @@
       summary: 'Summary',
       fullText: '↩ Full Text',
       summarizing: 'Summarizing content...',
-      badge: '💡 Key Takeaways',
+      badge: '💡 Summary',
       explainBadge: '🧠 Intuitive Breakdown',
-      prefixes: ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: ']
+      prefixes: ['• ', '• ', '• ']
     }
   };
 
-  // Contextual Takeaway Configurations: Adapt prefixes and badges to content domain
+  // Contextual Takeaway Configurations: Clean, universal badges across all domains
   const CONTEXTUAL_CONFIG = {
     tech: {
-      bn: {
-        badge: '💡 সহজ ভাষায় সারসংক্ষেপ',
-        prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: ']
-      },
-      hi: {
-        badge: '💡 मुख्य बातें (सरल सारांश)',
-        prefixes: ['🎯 मुख्य विषय: ', '⚙️ यह कैसे काम करता है: ', '💡 व्यावहारिक लाभ: ']
-      },
-      en: {
-        badge: '💡 Key Takeaways',
-        prefixes: ['🎯 Core Concept: ', '⚙️ How it works: ', '💡 Practical Tip: ']
-      },
-      es: {
-        badge: '💡 Puntos Clave',
-        prefixes: ['🎯 Concepto Clave: ', '⚙️ Cómo funciona: ', '💡 Beneficio Práctico: ']
-      }
+      bn: { badge: '💡 সারসংক্ষেপ', prefixes: ['• ', '• ', '• '] },
+      hi: { badge: '💡 सारांश', prefixes: ['• ', '• ', '• '] },
+      en: { badge: '💡 Summary', prefixes: ['• ', '• ', '• '] },
+      es: { badge: '💡 Resumen', prefixes: ['• ', '• ', '• '] }
     },
     news: {
-      bn: {
-        badge: '📰 সংবাদের মূল সারসংক্ষেপ',
-        prefixes: ['📌 মূল সংবাদ: ', '💬 কী বলা হয়েছে: ', '📋 মূল সিদ্ধান্ত বা প্রভাব: ']
-      },
-      hi: {
-        badge: '📰 मुख्य समाचार सारांश',
-        prefixes: ['📌 मुख्य समाचार: ', '💬 क्या कहा गया: ', '📋 मुख्य निर्णय / प्रभाव: ']
-      },
-      en: {
-        badge: '📰 News Takeaways',
-        prefixes: ['📌 Key Event: ', '💬 What was said: ', '📋 Decision & Impact: ']
-      },
-      es: {
-        badge: '📰 Resumen de Noticias',
-        prefixes: ['📌 Noticia Principal: ', '💬 Declaraciones: ', '📋 Decisión e Impacto: ']
-      }
+      bn: { badge: '💡 সারসংক্ষেপ', prefixes: ['• ', '• ', '• '] },
+      hi: { badge: '💡 सारांश', prefixes: ['• ', '• ', '• '] },
+      en: { badge: '💡 Summary', prefixes: ['• ', '• ', '• '] },
+      es: { badge: '💡 Resumen', prefixes: ['• ', '• ', '• '] }
     },
     general: {
-      bn: {
-        badge: '💡 মূল সারসংক্ষেপ',
-        prefixes: ['📌 মূল কথা: ', '💡 গুরুত্বপূর্ণ দিক: ', '🔍 বিস্তারিত: ']
-      },
-      hi: {
-        badge: '💡 मुख्य बातें',
-        prefixes: ['📌 मुख्य बात: ', '💡 महत्वपूर्ण पहलू: ', '🔍 मुख्य विवरण: ']
-      },
-      en: {
-        badge: '💡 Key Summary',
-        prefixes: ['📌 Main Point: ', '💡 Key Aspect: ', '🔍 Notable Details: ']
-      },
-      es: {
-        badge: '💡 Resumen Principal',
-        prefixes: ['📌 Punto Principal: ', '💡 Aspecto Relevante: ', '🔍 Detalles: ']
-      }
+      bn: { badge: '💡 সারসংক্ষেপ', prefixes: ['• ', '• ', '• '] },
+      hi: { badge: '💡 सारांश', prefixes: ['• ', '• ', '• '] },
+      en: { badge: '💡 Summary', prefixes: ['• ', '• ', '• '] },
+      es: { badge: '💡 Resumen', prefixes: ['• ', '• ', '• '] }
     }
   };
 
@@ -417,44 +381,13 @@
     }
 
     if (taskType === 'summarization') {
-      if (ctx === 'news') {
-        if (targetLang === 'bn') {
-          return `আপনি একজন অভিজ্ঞ সংবাদ বিশ্লেষক ও সাংবাদিক। যেকোনো খবর বা সাম্প্রতিক ঘটনার সারসংক্ষেপ ৩টি স্পষ্ট ও তথ্যবহুল পয়েন্টে উপস্থাপন করুন:
-1. 📌 মূল সংবাদ: (ঘটনাটি কী এবং মূল কারা জড়িত তা ১ লাইনে সুস্পষ্টভাবে তুলে ধরুন)
-2. 💬 মূল বক্তব্য ও প্রেক্ষাপট: (কেন ঘটনাটি ঘটেছে, কী বিবৃতি, দাবি বা পটভূমি রয়েছে তা সংক্ষেপে গুছিয়ে লিখুন)
-3. 📋 মূল সিদ্ধান্ত বা প্রভাব: (প্রশাসনের পদক্ষেপ, ফলাফল বা সামগ্রিক প্রভাব কী হতে পারে তা বিশ্লেষণ করুন)
-কখনো কোনো ওয়েবসাইটের বিজ্ঞাপনী বাক্য বা অসম্পূর্ণ তথ্য রাখবেন না। শুধুমাত্র এই ৩টি পয়েন্ট সরাসরি লিখুন।`;
-        }
-        if (targetLang === 'hi') {
-          return `आप एक कुशल समाचार विश्लेषक हैं। समाचार की मुख्य बातों को 3 स्पष्ट बिंदुओं में प्रस्तुत करें:
-1. 📌 मुख्य समाचार: (घटना क्या है और कौन शामिल है, 1 पंक्ति में)
-2. 💬 मुख्य बयान व संदर्भ: (कारण, बयान या पृष्ठभूमि)
-3. 📋 मुख्य निर्णय या प्रभाव: (प्रशासन की कार्रवाई, परिणाम या प्रभाव)
-अनावश्यक विज्ञापन या लिंक्स न जोड़ें। केवल ये 3 बिंदु लिखें।`;
-        }
-        return `You are an expert news analyst. Summarize the news article into 3 clear, structured takeaways:
-1. 📌 Key Event: (What happened and who is involved in 1 crisp line)
-2. 💬 Statements & Context: (Why it happened, statements made, or background context)
-3. 📋 Decision & Impact: (Actions taken, outcomes, or broader significance)
-Output strictly these 3 bullet points without conversational filler.`;
+      if (targetLang === 'bn') {
+        return 'আপনি একজন দক্ষ ভাষা ও তথ্য বিশেষজ্ঞ। প্রদত্ত লেখার মূল ভাব ও গুরুত্বপূর্ণ তথ্যগুলো ২ থেকে ৩টি সংক্ষিপ্ত, প্রাঞ্জল ও তথ্যবহুল বুলেট পয়েন্টে (•) সারসংক্ষেপ করুন। কোনো অপ্রয়োজনীয় ক্যাটাগরি লেবেল বা ভূমিকা ছাড়া সরাসরি বুলেট পয়েন্ট লিখুন।';
       }
-
-      if (ctx === 'general') {
-        if (targetLang === 'bn') {
-          return `আপনি যেকোনো লেখার মূল ভাব ও গুরুত্বপূর্ণ বিষয়গুলো অত্যন্ত সহজ ও প্রাঞ্জল বাংলায় ৩টি গোছানো বুলেট পয়েন্টে উপস্থাপন করেন:
-1. 📌 মূল কথা: (লেখার মূল প্রতিপাদ্য)
-2. 💡 গুরুত্বপূর্ণ দিক: (প্রধান তথ্য বা যুক্তি)
-3. 📋 মূল তাৎপর্য: (মূল ফলাফল বা সিদ্ধান্ত)
-সরাসরি ৩টি পয়েন্ট লিখুন।`;
-        }
-        return `Summarize the content into 3 clear, high-level takeaways (📌 Main Point, 💡 Key Aspect, 📋 Significance). Output only bullet points.`;
+      if (targetLang === 'hi') {
+        return 'आप एक कुशल भाषा व सूचना विशेषज्ञ हैं। दिए गए पाठ का मुख्य सार 2 से 3 संक्षिप्त, स्पष्ट और सटीक बुलेट पॉइंट्स (•) में प्रस्तुत करें। बिना किसी अनावश्यक लेबल के सीधे बुलेट पॉइंट्स लिखें।';
       }
-
-      // Default: tech (LWS Master Educator Persona)
-      const directives = LWS_SYSTEM_DIRECTIVES[targetLang] || LWS_SYSTEM_DIRECTIVES.en;
-      let basePrompt = directives.join(' ');
-      basePrompt += ` Output exactly 2 to 3 concise bullet points with the appropriate icons (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}). Output only bullet points without conversational filler.`;
-      return basePrompt;
+      return 'You are an expert summarizer. Summarize the text into 2 to 3 concise, clear, and high-quality bullet points (•). Do not include artificial category labels or conversational filler. Output strictly bullet points.';
     }
 
     // Translation task
@@ -474,8 +407,6 @@ Output strictly these 3 bullet points without conversational filler.`;
    */
   function buildUserPrompt(text, targetLang = 'bn', context = null, taskType = 'summarization') {
     const ctx = context || detectContext(text);
-    const i18n = getI18nLabels(targetLang, ctx);
-    const markers = i18n.prefixes.map((p) => p.replace(/:\s*$/, '')).join(', ');
 
     if (taskType === 'explanation') {
       if (targetLang === 'bn') {
@@ -487,23 +418,13 @@ Output strictly these 3 bullet points without conversational filler.`;
       return `Explain the following concept in intuitive terms with a memorable real-world analogy in 3 sections (💡 In Plain Terms, 🔍 Real-World Analogy, ⚡ Why It Matters):\n\n${text}`;
     }
 
-    if (ctx === 'news') {
-      if (targetLang === 'bn') {
-        return `প্রদত্ত সংবাদটি বিশ্লেষণ করে ৩টি পয়েন্টে (📌 মূল সংবাদ, 💬 মূল বক্তব্য ও প্রেক্ষাপট, 📋 মূল সিদ্ধান্ত বা প্রভাব) উচ্চমানের সারসংক্ষেপ তৈরি করুন:\n\n${text}`;
-      }
-      if (targetLang === 'hi') {
-        return `दिए गए समाचार का विश्लेषण करके 3 बिंदुओं (📌 मुख्य समाचार, 💬 मुख्य बयान व संदर्भ, 📋 मुख्य निर्णय या प्रभाव) में उच्च-स्तरीय सारांश दें:\n\n${text}`;
-      }
-      return `Analyze and summarize this news report into 3 structured points (📌 Key Event, 💬 Statements & Context, 📋 Decision & Impact):\n\n${text}`;
-    }
-
     if (targetLang === 'bn') {
-      return `নিচের টেকনিক্যাল ডকুমেন্টেশনটি সুমিত সাহা (LWS) স্টাইলে ৩টি সহজ পয়েন্টে (${markers}) সারসংক্ষেপ করে দিন:\n\n${text}`;
+      return `নিচের লেখাটির মূল সারসংক্ষেপ ২-৩টি সহজ ও স্পষ্ট বুলেট পয়েন্টে (•) লিখে দিন:\n\n${text}`;
     }
     if (targetLang === 'hi') {
-      return `निम्नलिखित तकनीकी विवरण को सरल भाषा में 3 स्पष्ट बिंदुओं (${markers}) में संक्षेप करें:\n\n${text}`;
+      return `निम्नलिखित पाठ का मुख्य सारांश 2-3 स्पष्ट बुलेट पॉइंट्स (•) में लिखें:\n\n${text}`;
     }
-    return `Summarize the following technical documentation in 3 clear takeaways (${markers}):\n\n${text}`;
+    return `Summarize the following text into 2-3 clear, high-quality bullet points (•):\n\n${text}`;
   }
 
   /**

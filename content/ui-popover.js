@@ -577,8 +577,8 @@ window.UIPopover = (function () {
 
         .bt-summary-list {
           margin: 0 !important;
-          padding: 0 !important;
-          list-style: none !important;
+          padding: 0 0 0 18px !important;
+          list-style: disc !important;
         }
 
         .bt-summary-item {
@@ -587,12 +587,6 @@ window.UIPopover = (function () {
           line-height: 1.65 !important;
           font-size: 13.5px;
           white-space: normal !important;
-        }
-
-        .bt-summary-prefix {
-          font-weight: 600;
-          color: var(--bt-text);
-          display: inline;
         }
 
         .bt-summary-text {

@@ -528,28 +528,20 @@ window.SummarizerEngine = (function () {
   function formatResult(points, engine, targetLang, context = 'tech') {
     const i18n = window.PromptHarness?.getI18nLabels
       ? window.PromptHarness.getI18nLabels(targetLang, context)
-      : (targetLang === 'bn'
-          ? (context === 'news' ? { badge: '📰 সংবাদের মূল সারসংক্ষেপ' } : { badge: '💡 সহজ ভাষায় সারসংক্ষেপ' })
-          : (targetLang === 'hi'
-              ? (context === 'news' ? { badge: '📰 मुख्य समाचार सारांश' } : { badge: '💡 मुख्य बातें (सरल सारांश)' })
-              : { badge: '💡 Key Takeaways' }));
-    const badgeLabel = i18n.badge || '💡 Key Takeaways';
+      : { badge: targetLang === 'bn' ? '💡 সারসংক্ষেপ' : (targetLang === 'hi' ? '💡 सारांश' : '💡 Summary') };
+    const badgeLabel = i18n.badge || (targetLang === 'bn' ? '💡 সারসংক্ষেপ' : (targetLang === 'hi' ? '💡 सारांश' : '💡 Summary'));
 
     const itemsHtml = points
       .map((p) => {
         const cleanPt = p.replace(/^[-*•#\d.]+\s*/, '').trim();
         const escaped = escapeHtml(cleanPt);
-        const match = escaped.match(/^((?:[^\s:]+[\s:]){1,3}[^:]+:)\s*(.*)$/);
-        if (match) {
-          return `<li class="bt-summary-item"><strong class="bt-summary-prefix">${match[1]}</strong> <span class="bt-summary-text">${match[2]}</span></li>`;
-        }
         return `<li class="bt-summary-item"><span class="bt-summary-text">${escaped}</span></li>`;
       })
       .join('');
 
     const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">${engine}</span></div><ul class="bt-summary-list">${itemsHtml}</ul></div>`.trim();
 
-    const plainText = `${badgeLabel}:\n` + points.map((p) => `• ${p}`).join('\n');
+    const plainText = `${badgeLabel}:\n` + points.map((p) => `• ${p.replace(/^[-*•#\d.]+\s*/, '').trim()}`).join('\n');
 
     return {
       points,
