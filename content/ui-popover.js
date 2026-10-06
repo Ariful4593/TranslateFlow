@@ -1380,14 +1380,40 @@ window.UIPopover = (function () {
     window.speechSynthesis.speak(utterance);
   }
 
-  function showToast(msg) {
-    const toast = shadowRoot.getElementById('bt-toast');
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 2000);
+  /**
+   * Determines if the content is long/description-type content where
+   * Explain and Summarize features are genuinely useful.
+   * For short titles, headlines, single lines, phrases, or 1-2 short sentences, returns false.
+   *
+   * @param {string} text
+   * @returns {boolean}
+   */
+  function isDescriptionContent(text) {
+    if (!text || typeof text !== 'string') return false;
+    const clean = text.trim();
+    if (!clean) return false;
+
+    // Count words
+    const words = clean.split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+
+    // Count distinct sentences (split by . ! ? । and newlines)
+    const sentences = clean
+      .split(/(?<=[।!?\n])|(?<=\.\s+)/g)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 5);
+
+    // Multi-sentence content (3 or more full sentences) -> Description
+    if (sentences.length >= 3) return true;
+
+    // Substantial word count (28 or more words) -> Description
+    if (wordCount >= 28) return true;
+
+    // Lengthy text with multiple sentences (>= 150 chars and >= 2 sentences) -> Description
+    if (clean.length >= 150 && sentences.length >= 2) return true;
+
+    // Otherwise, it is short content (e.g. title, headline, single line, 1-2 short sentences)
+    return false;
   }
 
   /**
@@ -1511,11 +1537,14 @@ window.UIPopover = (function () {
       speakBtn.title = i18n.listen;
     }
 
+    const isLongDescription = isDescriptionContent(text);
+
     // Reset explain button & state
     isShowingExplanation = false;
     currentExplanationData = null;
     const explainBtn = shadowRoot.getElementById('bt-explain');
     if (explainBtn) {
+      explainBtn.style.display = isLongDescription ? 'inline-flex' : 'none';
       explainBtn.classList.remove('active');
       const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
       if (expSpan) expSpan.textContent = i18n.explain || 'সহজ ব্যাখ্যা';
@@ -1548,6 +1577,7 @@ window.UIPopover = (function () {
 
     const sumBtn = shadowRoot.getElementById('bt-summarize');
     if (sumBtn) {
+      sumBtn.style.display = isLongDescription ? 'inline-flex' : 'none';
       sumBtn.classList.remove('active');
       const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
       if (sumSpan) sumSpan.textContent = i18n.summary;
@@ -1787,8 +1817,12 @@ window.UIPopover = (function () {
     isShowingExplanation = false;
     currentExplanationData = null;
 
+    const textToCheck = originalSelectedText || translatedText || '';
+    const isLongDescription = isDescriptionContent(textToCheck);
+
     const explainBtn = shadowRoot.getElementById('bt-explain');
     if (explainBtn) {
+      explainBtn.style.display = isLongDescription ? 'inline-flex' : 'none';
       explainBtn.classList.remove('active');
       const isEn = currentTargetLang === 'en';
       const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
@@ -1798,6 +1832,7 @@ window.UIPopover = (function () {
 
     const sumBtn = shadowRoot.getElementById('bt-summarize');
     if (sumBtn) {
+      sumBtn.style.display = isLongDescription ? 'inline-flex' : 'none';
       sumBtn.classList.remove('active');
       const isEn = currentTargetLang === 'en';
       const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
