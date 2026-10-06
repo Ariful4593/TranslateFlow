@@ -401,6 +401,7 @@
 
   /**
    * Generates a context-aware system prompt for Chrome Built-in LanguageModel / Summarizer.
+   * Provides high-level agent instructions for domain-specific, executive-level summaries.
    * @param {string} [targetLang='bn']
    * @param {'translation'|'summarization'|'explanation'} [taskType='summarization']
    * @param {'tech'|'news'|'general'} [context='tech']
@@ -418,22 +419,38 @@
     if (taskType === 'summarization') {
       if (ctx === 'news') {
         if (targetLang === 'bn') {
-          return `আপনি সংবাদ প্রতিবেদন ও সাম্প্রতিক ঘটনার তথ্য অত্যন্ত সহজ ও প্রাঞ্জল বাংলায় উপস্থাপন করেন। খবরটির মূল ঘটনা, বক্তব্য ও ফলাফল ২ থেকে ৩টি স্পষ্ট পয়েন্টে (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}) সাজিয়ে দিন। কোনো ভুল বা বিভ্রান্তিকর টেকনিক্যাল শব্দ (যেমন 'কীভাবে কাজ করে') ব্যবহার করবেন না। শুধু পয়েন্টগুলো লিখুন।`;
+          return `আপনি একজন অভিজ্ঞ সংবাদ বিশ্লেষক ও সাংবাদিক। যেকোনো খবর বা সাম্প্রতিক ঘটনার সারসংক্ষেপ ৩টি স্পষ্ট ও তথ্যবহুল পয়েন্টে উপস্থাপন করুন:
+1. 📌 মূল সংবাদ: (ঘটনাটি কী এবং মূল কারা জড়িত তা ১ লাইনে সুস্পষ্টভাবে তুলে ধরুন)
+2. 💬 মূল বক্তব্য ও প্রেক্ষাপট: (কেন ঘটনাটি ঘটেছে, কী বিবৃতি, দাবি বা পটভূমি রয়েছে তা সংক্ষেপে গুছিয়ে লিখুন)
+3. 📋 মূল সিদ্ধান্ত বা প্রভাব: (প্রশাসনের পদক্ষেপ, ফলাফল বা সামগ্রিক প্রভাব কী হতে পারে তা বিশ্লেষণ করুন)
+কখনো কোনো ওয়েবসাইটের বিজ্ঞাপনী বাক্য বা অসম্পূর্ণ তথ্য রাখবেন না। শুধুমাত্র এই ৩টি পয়েন্ট সরাসরি লিখুন।`;
         }
         if (targetLang === 'hi') {
-          return `आप समाचार और घटनाओं को सरल व स्पष्ट हिंदी में 2 से 3 बिंदुओं (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}) में संक्षेप करते हैं। अप्रासंगिक तकनीकी शब्द प्रयोग न करें।`;
+          return `आप एक कुशल समाचार विश्लेषक हैं। समाचार की मुख्य बातों को 3 स्पष्ट बिंदुओं में प्रस्तुत करें:
+1. 📌 मुख्य समाचार: (घटना क्या है और कौन शामिल है, 1 पंक्ति में)
+2. 💬 मुख्य बयान व संदर्भ: (कारण, बयान या पृष्ठभूमि)
+3. 📋 मुख्य निर्णय या प्रभाव: (प्रशासन की कार्रवाई, परिणाम या प्रभाव)
+अनावश्यक विज्ञापन या लिंक्स न जोड़ें। केवल ये 3 बिंदु लिखें।`;
         }
-        return `Summarize news and current events clearly and factually into 2 to 3 points (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}). Output only bullet points.`;
+        return `You are an expert news analyst. Summarize the news article into 3 clear, structured takeaways:
+1. 📌 Key Event: (What happened and who is involved in 1 crisp line)
+2. 💬 Statements & Context: (Why it happened, statements made, or background context)
+3. 📋 Decision & Impact: (Actions taken, outcomes, or broader significance)
+Output strictly these 3 bullet points without conversational filler.`;
       }
 
       if (ctx === 'general') {
         if (targetLang === 'bn') {
-          return `আপনি যেকোনো লেখার মূল ভাব ও গুরুত্বপূর্ণ বিষয়গুলো সহজ বাংলায় ২ থেকে ৩টি পয়েন্টে (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}) তুলে ধরেন। শুধু বুলেট পয়েন্ট লিখুন।`;
+          return `আপনি যেকোনো লেখার মূল ভাব ও গুরুত্বপূর্ণ বিষয়গুলো অত্যন্ত সহজ ও প্রাঞ্জল বাংলায় ৩টি গোছানো বুলেট পয়েন্টে উপস্থাপন করেন:
+1. 📌 মূল কথা: (লেখার মূল প্রতিপাদ্য)
+2. 💡 গুরুত্বপূর্ণ দিক: (প্রধান তথ্য বা যুক্তি)
+3. 📋 মূল তাৎপর্য: (মূল ফলাফল বা সিদ্ধান্ত)
+সরাসরি ৩টি পয়েন্ট লিখুন।`;
         }
-        return `Summarize the content into 2 to 3 clear, concise takeaways (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}). Output only bullet points.`;
+        return `Summarize the content into 3 clear, high-level takeaways (📌 Main Point, 💡 Key Aspect, 📋 Significance). Output only bullet points.`;
       }
 
-      // Default: tech (LWS Style)
+      // Default: tech (LWS Master Educator Persona)
       const directives = LWS_SYSTEM_DIRECTIVES[targetLang] || LWS_SYSTEM_DIRECTIVES.en;
       let basePrompt = directives.join(' ');
       basePrompt += ` Output exactly 2 to 3 concise bullet points with the appropriate icons (${i18n.prefixes.map(p => p.split(':')[0]).join(', ')}). Output only bullet points without conversational filler.`;
@@ -472,12 +489,12 @@
 
     if (ctx === 'news') {
       if (targetLang === 'bn') {
-        return `নিচের সংবাদ প্রতিবেদনটি সহজ ভাষায় সংবাদের মূল বিষয় অনুযায়ী পয়েন্টে (${markers}) সারসংক্ষেপ করে দিন:\n\n${text}`;
+        return `প্রদত্ত সংবাদটি বিশ্লেষণ করে ৩টি পয়েন্টে (📌 মূল সংবাদ, 💬 মূল বক্তব্য ও প্রেক্ষাপট, 📋 মূল সিদ্ধান্ত বা প্রভাব) উচ্চমানের সারসংক্ষেপ তৈরি করুন:\n\n${text}`;
       }
       if (targetLang === 'hi') {
-        return `निम्नलिखित समाचार को स्पष्ट बिंदुओं (${markers}) में संक्षेप करें:\n\n${text}`;
+        return `दिए गए समाचार का विश्लेषण करके 3 बिंदुओं (📌 मुख्य समाचार, 💬 मुख्य बयान व संदर्भ, 📋 मुख्य निर्णय या प्रभाव) में उच्च-स्तरीय सारांश दें:\n\n${text}`;
       }
-      return `Summarize this news article into clear takeaways (${markers}):\n\n${text}`;
+      return `Analyze and summarize this news report into 3 structured points (📌 Key Event, 💬 Statements & Context, 📋 Decision & Impact):\n\n${text}`;
     }
 
     if (targetLang === 'bn') {

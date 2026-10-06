@@ -74,27 +74,33 @@ window.SummarizerEngine = (function () {
   }
 
   /**
-   * Identifies documentation links, navigation boilerplate, and call-to-action fragments
-   * (e.g., "Learn more in Cache Components", "আরও জানুন", "Read more").
+   * Identifies documentation links, navigation boilerplate, newspaper live update promos,
+   * and call-to-action fragments (e.g., "Learn more in Cache Components", "আরও জানুন", "লাইভ আপডেটগুলি পড়ুন").
    */
   function isBoilerplateOrNavText(text) {
     if (!text || typeof text !== 'string') return true;
     const clean = text.trim();
 
-    // 1. Navigation / Link / CTA patterns
+    // 1. Newspaper Live-Update Promos & CTA patterns
+    const newsPromoRegex = /(লাইভ আপডেট|লাইভ আপডেটগুলি|আপডেটগুলি পড়ুন|বিস্তারিত পড়ুন|আরও পড়ুন|লাইভ আপডেট পড়ুন|লাইভ আপডেট দেখুন|লাইভ কভারেজ|লাইভ খবর|লাইভ দেখুন|पढ़ें अमर उजाला|अमर उजाला की यह लाइव|लाइव अपडेट|लाइव अपडेट्स|लाइव कवरेज|लाइव खबर|पढ़ें|पढ़िए|live update|live updates|follow live|follow live updates|read live updates)/i;
+    if (newsPromoRegex.test(clean)) {
+      return true;
+    }
+
+    // 2. Navigation / Link / CTA patterns
     const ctaRegex = /^(learn more|read more|see also|check out|click here|find out more|refer to|for more information|for more info|for more details|view documentation|explore more|visit|get started|next steps)($|[\s.:—–])/i;
     const ctaInlineRegex = /(learn more in|learn more about|read more in|see also|check the docs|view the docs|for more details|আরও জানুন|বিস্তারিত জানুন|বিস্তারিত দেখুন|সম্পর্কে আরও জানুন|ডকুমেন্টেশন দেখুন|এখানে ক্লিক করুন|এখানে দেখুন|টুলস দেখুন|এবং আরও|এবং আরও অনেক|और जानें|अधिक जानकारी|अधिक पढ़ें)/i;
 
     if (ctaRegex.test(clean) || ctaInlineRegex.test(clean)) {
-      if (clean.length < 65) return true;
+      if (clean.length < 80) return true;
     }
 
-    // 2. Section headings / breadcrumbs
+    // 3. Section headings / breadcrumbs
     if (/^(table of contents|quick start|overview|prerequisites|introduction|summary|conclusion|সূচিপত্র|ভূমিকা|সারসংক্ষেপ)($|[:—–])/i.test(clean)) {
       return true;
     }
 
-    // 3. URLs, copyright, license notices
+    // 4. URLs, copyright, license notices
     if (/^(https?:\/\/|www\.|copyright|all rights reserved|©|license:)/i.test(clean)) {
       return true;
     }
@@ -103,11 +109,12 @@ window.SummarizerEngine = (function () {
   }
 
   /**
-   * Smart Linguistic Fallback (Learn with Sumit - LWS Explanatory Technique):
-   * Breaks complex technical text into crystal-clear, intuitive takeaways:
-   * 1. 🎯 মূল বিষয় (The Core Concept in simple terms)
-   * 2. ⚙️ কীভাবে কাজ করে (Working Mechanism)
-   * 3. 💡 বাস্তব সুবিধা বা টিপস (Practical Value / Best Practice)
+   * Smart Linguistic Fallback:
+   * Extracts clean, substantive key points directly from the content without promotional clutter.
+   *
+   * @param {string} text
+   * @param {string} lang
+   * @returns {string[]}
    */
   function smartExtractKeyPoints(text, lang = 'bn') {
     if (!text || !text.trim()) return [];
@@ -120,10 +127,13 @@ window.SummarizerEngine = (function () {
     // Split on sentence boundaries (Bangla dari, period, exclamation, question mark, newline)
     const rawSentences = processedText
       .split(/(?<=[।!?\n])|(?<=\.\s+)/g)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 12 && !isBoilerplateOrNavText(s));
+      .map((s) => s.trim().replace(/^[-*•#\d.]+\s*/, '').trim())
+      .filter((s) => s.length > 10 && !isBoilerplateOrNavText(s));
 
-    if (rawSentences.length === 0) return [processedText.trim()];
+    if (rawSentences.length === 0) {
+      const single = processedText.trim().replace(/^[-*•#\d.]+\s*/, '').trim();
+      return isBoilerplateOrNavText(single) ? [] : [single];
+    }
 
     const candidates = [];
 
@@ -143,39 +153,35 @@ window.SummarizerEngine = (function () {
         continue;
       }
 
-      // Skip navigation boilerplate or "Learn more" links
+      // Skip navigation or promotional boilerplate
       if (isBoilerplateOrNavText(s)) {
         continue;
       }
 
-      if (s.length >= 18) {
+      if (s.length >= 15) {
         candidates.push(s);
       }
 
       if (candidates.length >= 3) break;
     }
 
+    const pointsList = candidates.length > 0 ? candidates : rawSentences.slice(0, 3);
+
     // Detect domain context (tech, news, general)
     const context = window.PromptHarness?.detectContext
       ? window.PromptHarness.detectContext(processedText)
       : 'tech';
 
-    const pointsList = candidates.length > 0 ? candidates : rawSentences.slice(0, 2);
-
-    // Apply context-aware structured prefixes according to target language
+    // Format into natural, clean structured points
     const i18n = window.PromptHarness?.getI18nLabels
       ? window.PromptHarness.getI18nLabels(lang, context)
-      : (lang === 'bn'
-          ? (context === 'news'
-              ? { prefixes: ['📌 মূল সংবাদ: ', '💬 কী বলা হয়েছে: ', '📋 মূল সিদ্ধান্ত বা প্রভাব: '] }
-              : { prefixes: ['🎯 মূল বিষয়: ', '⚙️ কীভাবে কাজ করে: ', '💡 বাস্তব সুবিধা: '] })
-          : { prefixes: ['📌 Key Event: ', '💬 What was said: ', '📋 Impact: '] });
-    const prefixes = i18n.prefixes || ['📌 ', '💬 ', '📋 '];
+      : null;
+    const prefixes = i18n?.prefixes || ['• ', '• ', '• '];
 
     return pointsList.map((pt, idx) => {
       const cleanPt = pt.replace(/^[-*•#\d.]+\s*/, '').trim();
       if (/^(🎯|⚙️|💡|📌|💬|📋|🔹)/.test(cleanPt)) return cleanPt;
-      const prefix = prefixes[idx] || (lang === 'bn' ? '• ' : '• ');
+      const prefix = prefixes[idx] || '• ';
       return `${prefix}${cleanPt}`;
     });
   }
