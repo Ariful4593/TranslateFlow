@@ -322,6 +322,16 @@ window.SummarizerEngine = (function () {
       processedText = window.TermGuardian.postProcessBengaliText(processedText);
     }
 
+    const rawSentences = processedText
+      .split(/(?<=[।!?\n])|(?<=\.\s+)/g)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 8 && !isBoilerplateOrNavText(s));
+
+    const rawClean = (rawSentences[0] || processedText.trim())
+      .replace(/^[-*•#\d.]+\s*/, '')
+      .replace(/^(একটি|এটি একটি|ইহা একটি|মূলত|সহজ ভাষায়|সহজ কথায়)\s+/i, '')
+      .trim();
+
     const lower = textToCheck.toLowerCase();
     const isBn = lang === 'bn';
     const isHi = lang === 'hi';
@@ -618,46 +628,36 @@ window.SummarizerEngine = (function () {
         whyItMatters = 'Enables lightning-fast single-page application navigation with persistent global state.';
       }
     }
-    // 19. News / Transport / Public Administration
-    else if (/bus|traffic|minister|accident|police|dhaka|government|cabinet|parliament/i.test(lower)) {
+    // 19. News / Politics / Elections / Protests / Public Affairs
+    else if (/bus|traffic|minister|accident|police|dhaka|government|cabinet|parliament|protest|strike|demonstration|coalition|opposition|election|vote|rally|leader|bjp|congress|rahul|priyanka|modi|dharna|प्रदर्शन|धरना|गठबंधन|चुनाव|विपक्ष|नेता|राजनीति|संसद|सरकार|आंदोलन|বিক্ষোভ|ধর্না|জোট|রাজনীতি|সংসদ|আন্দোলন|মন্ত্রী|পুলিশ|সরকার/i.test(lower)) {
       if (isBn) {
-        concept = 'সহজ কথায়, সাম্প্রতিক ঘটনা বা নেওয়া সিদ্ধান্তের মূল উদ্দেশ্য এবং সাধারণ মানুষের দৈনন্দিন জীবনে এর প্রভাব কী তা স্পষ্টভাবে তুলে ধরা।';
-        analogy = 'যেমন শহরের ব্যস্ত মোড়ে ট্রাফিক লেন ও সুনির্দিষ্ট বাস স্টপ নির্ধারণ করে দেওয়া—শুরুতে কিছুটা নিয়ম মানতে হলেও পরে সবার যাতায়াত যানজটমুক্ত ও স্বস্তিদায়ক হয়ে ওঠে।';
-        whyItMatters = 'সংশ্লিষ্ট সবার মধ্যে নিয়মশৃঙ্খলা তৈরি হয় এবং অপ্রয়োজনীয় জটিলতা ও সময় অপচয় দূর হয়।';
+        concept = `সহজ ভাষায় মূল ঘটনা হলো—${rawClean}`;
+        analogy = 'যেমন সমাজে বা পরিবারে কোনো দাবির বিষয়ে সবার দৃষ্টি আকর্ষণ করতে সবাই একত্রিত হয়ে কথা বলে বা নিয়মতান্ত্রিক অবস্থান তুলে ধরে, রাজনীতিতেও নির্দিষ্ট দাবি বা অসন্তোষ প্রকাশের এটি একটি গণতান্ত্রিক মাধ্যম।';
+        whyItMatters = 'ঘটনাটির পটভূমি ও মূল দাবি পরিষ্কার জানা থাকলে দেশের চলমান রাজনৈতিক পরিস্থিতি, জনমত এবং নীতি-নির্ধারণী প্রভাব সহজে অনুধাবন করা যায়।';
       } else if (isHi) {
-        concept = 'सरल शब्दों में, हाल की घटना या सरकारी निर्णय का मूल उद्देश्य और आम नागरिकों पर पड़ने वाला प्रभाव।';
-        analogy = 'जैसे शहर में ट्रैफिक लेन और बस स्टॉप तय करने से जाम कम होता है और सभी की यात्रा सुगम बनती है।';
-        whyItMatters = 'व्यवस्था में अनुशासन आता है और लोगों का कीमती समय और धन बचता है।';
+        concept = `सरल शब्दों में मुख्य घटना यह है कि—${rawClean}`;
+        analogy = 'जैसे अपनी बात को मजबूती से रखने और ध्यान आकर्षित करने के लिए समूह में शांतिपूर्ण मांग रखी जाती है, वैसे ही लोकतंत्र में यह एक विरोध और अभिव्यक्ति का माध्यम है।';
+        whyItMatters = 'घटना की पृष्ठभूमि स्पष्ट होने से राजनीतिक स्थिति, जनमत और इसके प्रभाव को आसानी से समझा जा सकता है।';
       } else {
-        concept = 'Highlighting the core objective of policy decisions and how they directly impact public daily life.';
-        analogy = 'Like implementing designated bus lanes and predictable stops to untangle gridlock across crowded municipal routes.';
-        whyItMatters = 'Establishes systemic accountability, lowers transit friction, and saves valuable commuter time.';
+        concept = `In plain terms, the key event is: ${rawClean}`;
+        analogy = 'Like coming together to voice concerns and draw public attention to critical issues through structured collective expression.';
+        whyItMatters = 'Provides vital context to understand ongoing public affairs, policy implications, and democratic discourse.';
       }
     }
-    // 20. Contextual Adaptive Fallback (Intelligent Linguistic Synthesis - No Static Clock Analogies!)
+    // 20. Contextual Adaptive Universal Fallback (Clean & Context-Neutral)
     else {
-      const rawSentences = processedText
-        .split(/(?<=[।!?\n])|(?<=\.\s+)/g)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 12 && !isBoilerplateOrNavText(s));
-
-      const rawClean = (rawSentences[0] || processedText.trim())
-        .replace(/^[-*•#\d.]+\s*/, '')
-        .replace(/^(একটি|এটি একটি|ইহা একটি|মূলত|সহজ ভাষায়)\s+/i, '')
-        .trim();
-
       if (isBn) {
         concept = `সহজ ভাষায় বললে, মূল বিষয়টি হলো—${rawClean}`;
-        analogy = 'যেমন একটি সুপরিকল্পিত কারখানায় প্রতিটি দল যার যার নির্দিষ্ট দায়িত্ব আলাদাভাবে পালন করে যাতে পুরো প্রজেক্ট কোনো ঝামেলা ছাড়াই নিখুঁতভাবে সমাপ্ত হয়।';
-        whyItMatters = 'বিষয়টি স্পষ্টভাবে জানা থাকলে কোডিং ও আর্কিটেকচারে কোনো ভুল বোঝাবুঝি থাকে না এবং দ্রুত সঠিক সমাধান প্রয়োগ করা যায়।';
+        analogy = 'যেমন একটি সুসংগঠিত কার্যক্রমে প্রতিটি অংশের নিজস্ব কার্যকারিতা থাকে এবং সবগুলো সমন্বিত হয়ে মূল ফলাফল তৈরি করে।';
+        whyItMatters = 'বিষয়টির মূল ভাব ও উদ্দেশ্য পরিষ্কার জানা থাকলে বাস্তব ক্ষেত্রে তথ্যটি সহজে মনে রাখা এবং সঠিকভাবে প্রয়োগ করা যায়।';
       } else if (isHi) {
         concept = `सरल शब्दों में, मुख्य बात यह है कि—${rawClean}`;
-        analogy = 'जैसे किसी सुव्यवस्थित कारखाने में प्रत्येक टीम अपना काम अलग से करती है ताकि पूरी परियोजना समय पर और बिना बाधा के पूरी हो।';
-        whyItMatters = 'मूल अवधारणा स्पष्ट होने से काम में कोई गलती नहीं होती और उत्पादकता बढ़ती है।';
+        analogy = 'जैसे किसी सुव्यवस्थित व्यवस्था में प्रत्येक भाग का अपना महत्व होता है और सब मिलकर सही परिणाम देते हैं।';
+        whyItMatters = 'मूल उद्देश्य स्पष्ट होने से जानकारी को आसानी से समझा और उपयोग किया जा सकता है।';
       } else {
-        concept = `In plain terms, the core concept is: ${rawClean}`;
-        analogy = 'Like specialized stations on an organized assembly line working in harmony to complete deliverables efficiently.';
-        whyItMatters = 'Gives foundational clarity to build and optimize solutions without subtle bugs or misconceptions.';
+        concept = `In plain terms, the core essence is: ${rawClean}`;
+        analogy = 'Like structured components in an organized process working together to achieve a clear outcome.';
+        whyItMatters = 'Provides clear understanding to interpret information accurately without ambiguity.';
       }
     }
 
