@@ -309,22 +309,7 @@ window.UIPopover = (function () {
           gap: 4px;
         }
 
-        .bt-engine-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 3px;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 10px;
-          font-weight: 600;
-          background: rgba(37, 99, 235, 0.1);
-          color: var(--bt-primary);
-        }
 
-        .bt-engine-badge.native {
-          background: rgba(16, 185, 129, 0.12);
-          color: var(--bt-accent);
-        }
 
         .bt-icon-btn,
         .bt-close-btn {
@@ -566,15 +551,6 @@ window.UIPopover = (function () {
           line-height: 1.4;
         }
 
-        .bt-summary-engine {
-          font-size: 10px;
-          color: var(--bt-text-muted);
-          background: rgba(0, 0, 0, 0.04);
-          padding: 2px 6px;
-          border-radius: 4px;
-          line-height: 1.3;
-        }
-
         .bt-summary-list {
           margin: 0 !important;
           padding: 0 0 0 18px !important;
@@ -637,15 +613,6 @@ window.UIPopover = (function () {
           line-height: 1.4;
         }
 
-        .bt-explain-engine {
-          font-size: 10px;
-          color: var(--bt-text-muted);
-          background: rgba(0, 0, 0, 0.04);
-          padding: 2px 6px;
-          border-radius: 4px;
-          line-height: 1.3;
-        }
-
         .bt-explain-body {
           font-size: 13.5px;
           line-height: 1.65;
@@ -698,7 +665,6 @@ window.UIPopover = (function () {
           <div class="bt-header-left">
             <svg class="bt-drag-icon" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
             <span id="bt-lang-direction">English ➔ বাংলা</span>
-            <span class="bt-engine-badge" id="bt-engine">⚡ AI</span>
           </div>
           <div class="bt-header-right">
             <button class="bt-icon-btn" id="bt-expand" title="বড় করে পড়ুন (Expand reading view)">
@@ -1802,7 +1768,7 @@ window.UIPopover = (function () {
       const isEn = currentTargetLang === 'en';
       const expSpan = explainBtn.querySelector('#bt-explain-text') || explainBtn.querySelector('span');
       if (expSpan) expSpan.textContent = isEn ? 'Explain' : 'সহজ ব্যাখ্যা';
-      explainBtn.title = isEn ? 'Explain concept simply' : 'সহজ ভাষায় বিস্তারিত ব্যাখ্যা ও বাস্তব উদাহরণ দেখুন';
+      explainBtn.title = isEn ? 'Explain' : 'সহজ ব্যাখ্যা';
     }
 
     const sumBtn = shadowRoot.getElementById('bt-summarize');
@@ -1812,20 +1778,10 @@ window.UIPopover = (function () {
       const isEn = currentTargetLang === 'en';
       const sumSpan = sumBtn.querySelector('#bt-summarize-text') || sumBtn.querySelector('span');
       if (sumSpan) sumSpan.textContent = isEn ? 'Summary' : 'সারসংক্ষেপ';
-      sumBtn.title = isEn ? 'Summarize key points' : 'সহজ ভাষায় মূল সারসংক্ষেপ দেখুন';
+      sumBtn.title = isEn ? 'Summary' : 'সারসংক্ষেপ';
     }
 
     const contentBox = shadowRoot.getElementById('bt-content');
-    const engineBadge = shadowRoot.getElementById('bt-engine');
-
-    if (engineBadge) {
-      engineBadge.textContent = engineName.includes('Native') ? '⚡ Native AI' : '🌐 Web';
-      if (engineName.includes('Native')) {
-        engineBadge.classList.add('native');
-      } else {
-        engineBadge.classList.remove('native');
-      }
-    }
 
     if (contentBox) {
       if (translatedText) {
@@ -1983,7 +1939,7 @@ window.UIPopover = (function () {
         const badge = i18n.explainBadge || (currentTargetLang === 'bn' ? '🧠 সহজ ব্যাখ্যা' : (currentTargetLang === 'hi' ? '🧠 सरल व्याख्या' : '🧠 Simple Explanation'));
         const bodyHtml = fallback.html || (fallback.paragraphs || [fallback.text]).map((p) => `<p class="bt-explain-para">${escapeHtml(p)}</p>`).join('');
 
-        const html = `<div class="bt-explain-container"><div class="bt-explain-header"><span class="bt-explain-badge">${badge}</span><span class="bt-explain-engine">Smart Explainer</span></div><div class="bt-explain-body">${bodyHtml}</div></div>`.trim();
+        const html = `<div class="bt-explain-container"><div class="bt-explain-header"><span class="bt-explain-badge">${badge}</span></div><div class="bt-explain-body">${bodyHtml}</div></div>`.trim();
 
         currentExplanationData = {
           html,
@@ -2122,7 +2078,7 @@ window.UIPopover = (function () {
           return `<li class="bt-summary-item"><span class="bt-summary-text">${cleanPt}</span></li>`;
         }).join('');
 
-        const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">Smart Summary</span></div><ul class="bt-summary-list">${items}</ul></div>`.trim();
+        const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span></div><ul class="bt-summary-list">${items}</ul></div>`.trim();
         currentSummaryData = {
           points: fallbackPoints,
           html: html,

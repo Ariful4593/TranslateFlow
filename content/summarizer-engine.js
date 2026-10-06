@@ -478,7 +478,6 @@ window.SummarizerEngine = (function () {
       <div class="bt-explain-container">
         <div class="bt-explain-header">
           <span class="bt-explain-badge">${badgeLabel}</span>
-          <span class="bt-explain-engine">${engine}</span>
         </div>
         <div class="bt-explain-body">${bodyHtml}</div>
       </div>
@@ -511,7 +510,7 @@ window.SummarizerEngine = (function () {
       })
       .join('');
 
-    const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span><span class="bt-summary-engine">${engine}</span></div><ul class="bt-summary-list">${itemsHtml}</ul></div>`.trim();
+    const html = `<div class="bt-summary-container"><div class="bt-summary-header"><span class="bt-summary-badge">${badgeLabel}</span></div><ul class="bt-summary-list">${itemsHtml}</ul></div>`.trim();
 
     const plainText = `${badgeLabel}:\n` + points.map((p) => `• ${p.replace(/^[-*•#\d.]+\s*/, '').trim()}`).join('\n');
 
