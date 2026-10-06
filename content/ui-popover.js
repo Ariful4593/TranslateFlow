@@ -647,44 +647,25 @@ window.UIPopover = (function () {
         }
 
         .bt-explain-body {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+          font-size: 13.5px;
+          line-height: 1.65;
+          color: var(--bt-text);
           margin: 0 !important;
           padding: 0 !important;
         }
 
-        .bt-explain-section {
-          background: rgba(0, 0, 0, 0.02);
-          border: 1px solid var(--bt-border);
-          border-radius: 8px;
-          padding: 8px 10px;
-          transition: background 0.15s ease, border-color 0.15s ease;
+        .bt-explain-para {
+          margin: 0 0 8px 0;
+          line-height: 1.65;
         }
 
-        .bt-explain-section:hover {
-          background: rgba(0, 0, 0, 0.035);
-          border-color: rgba(124, 58, 237, 0.3);
+        .bt-explain-para:last-child {
+          margin-bottom: 0;
         }
 
-        .bt-explain-sec-title {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 12px;
-          font-weight: 700;
-          color: var(--bt-text);
-          margin-bottom: 4px;
-        }
-
-        .bt-explain-icon {
-          font-size: 14px;
-          line-height: 1;
-        }
-
-        .bt-explain-sec-content {
-          font-size: 13px;
-          line-height: 1.6;
+        .bt-explain-text {
+          font-size: 13.5px;
+          line-height: 1.65;
           color: var(--bt-text);
           white-space: normal;
         }
@@ -755,12 +736,12 @@ window.UIPopover = (function () {
             <span>শুনুন</span>
           </button>
 
-          <button class="bt-tool-btn" id="bt-explain" title="সহজ ভাষায় বিস্তারিত ব্যাখ্যা ও বাস্তব উদাহরণ দেখুন">
+          <button class="bt-tool-btn" id="bt-explain" title="সহজ ব্যাখ্যা দেখুন">
             <svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-1.3l-.85-.6C7.8 13.16 7 11.42 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 2.42-.8 4.16-2.15 5.1z"/></svg>
             <span id="bt-explain-text">সহজ ব্যাখ্যা</span>
           </button>
 
-          <button class="bt-tool-btn" id="bt-summarize" title="সহজ ভাষায় মূল সারসংক্ষেপ দেখুন">
+          <button class="bt-tool-btn" id="bt-summarize" title="সারসংক্ষেপ দেখুন">
             <svg viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
             <span id="bt-summarize-text">সারসংক্ষেপ</span>
           </button>
@@ -1904,10 +1885,10 @@ window.UIPopover = (function () {
     const i18n = window.PromptHarness?.getI18nLabels
       ? window.PromptHarness.getI18nLabels(currentTargetLang)
       : (currentTargetLang === 'bn'
-          ? { explain: 'সহজ ব্যাখ্যা', fullText: '↩ মূল অনুবাদ', explaining: 'সহজ ভাষায় বুঝিয়ে দেওয়া হচ্ছে...', explainBadge: '🧠 সহজ ভাষায় বিশ্লেষণ' }
+          ? { explain: 'সহজ ব্যাখ্যা', fullText: '↩ মূল অনুবাদ', explaining: 'সহজ ভাষায় বুঝিয়ে দেওয়া হচ্ছে...', explainBadge: '🧠 সহজ ব্যাখ্যা' }
           : (currentTargetLang === 'hi'
-              ? { explain: 'सरल व्याख्या', fullText: '↩ मूल अनुवाद', explaining: 'सरल भाषा में समझ रहे हैं...', explainBadge: '🧠 सरल भाषा में व्याख्या' }
-              : { explain: 'Explain', fullText: '↩ Full Text', explaining: 'Explaining in simple terms...', explainBadge: '🧠 Intuitive Breakdown' }));
+              ? { explain: 'सरल व्याख्या', fullText: '↩ मूल अनुवाद', explaining: 'सरल भाषा में समझ रहे हैं...', explainBadge: '🧠 सरल व्याख्या' }
+              : { explain: 'Explain', fullText: '↩ Full Text', explaining: 'Explaining in simple terms...', explainBadge: '🧠 Simple Explanation' }));
 
     // If currently showing explanation, restore full translation
     if (isShowingExplanation) {
@@ -1997,32 +1978,17 @@ window.UIPopover = (function () {
       if (isShowingExplanation) {
         const fallback = window.SummarizerEngine?.smartExplain
           ? window.SummarizerEngine.smartExplain(originalSelectedText, currentTranslatedText, currentTargetLang)
-          : { concept: currentTranslatedText || originalSelectedText, analogy: '', whyItMatters: '' };
+          : { text: currentTranslatedText || originalSelectedText, paragraphs: [currentTranslatedText || originalSelectedText] };
 
-        const isBn = currentTargetLang === 'bn';
-        const isHi = currentTargetLang === 'hi';
-        const sections = [
-          { icon: '💡', title: isBn ? 'সহজ ভাষায় মূল ধারণা' : (isHi ? 'सरल भाषा में मूल विचार' : 'Core Concept in Plain Terms'), content: fallback.concept },
-          { icon: '🔍', title: isBn ? 'বিস্তারিত বিশ্লেষণ ও প্রেক্ষাপট' : (isHi ? 'विस्तृत विश्लेषण व संदर्भ' : 'Context & Key Details'), content: fallback.analogy },
-          { icon: '⚡', title: isBn ? 'কেন এটি গুরুত্বপূর্ণ' : (isHi ? 'यह क्यों महत्वपूर्ण है' : 'Why It Matters'), content: fallback.whyItMatters }
-        ];
+        const badge = i18n.explainBadge || (currentTargetLang === 'bn' ? '🧠 সহজ ব্যাখ্যা' : (currentTargetLang === 'hi' ? '🧠 सरल व्याख्या' : '🧠 Simple Explanation'));
+        const bodyHtml = fallback.html || (fallback.paragraphs || [fallback.text]).map((p) => `<p class="bt-explain-para">${escapeHtml(p)}</p>`).join('');
 
-        const badge = i18n.explainBadge || '🧠 সহজ ভাষায় বিশ্লেষণ';
-        const itemsHtml = sections
-          .map((sec) => `
-            <div class="bt-explain-section">
-              <div class="bt-explain-sec-title"><span class="bt-explain-icon">${sec.icon}</span><span>${sec.title}</span></div>
-              <div class="bt-explain-sec-content">${sec.content}</div>
-            </div>
-          `.trim())
-          .join('');
-
-        const html = `<div class="bt-explain-container"><div class="bt-explain-header"><span class="bt-explain-badge">${badge}</span><span class="bt-explain-engine">Smart Explainer</span></div><div class="bt-explain-body">${itemsHtml}</div></div>`.trim();
+        const html = `<div class="bt-explain-container"><div class="bt-explain-header"><span class="bt-explain-badge">${badge}</span><span class="bt-explain-engine">Smart Explainer</span></div><div class="bt-explain-body">${bodyHtml}</div></div>`.trim();
 
         currentExplanationData = {
-          sections,
           html,
-          plainText: `${badge}:\n` + sections.map(s => `${s.icon} ${s.title}: ${s.content}`).join('\n\n')
+          plainText: `${badge}:\n${fallback.text || currentTranslatedText}`,
+          engine: 'Smart Explainer'
         };
 
         safeViewTransition(() => {

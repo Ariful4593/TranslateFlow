@@ -300,23 +300,28 @@ window.SummarizerEngine = (function () {
   }
 
   /**
-   * Smart Dynamic Text Explanation & Concept Breakdown (Offline / Instant Fallback)
-   * Dynamically breaks down any text (tech, news, law, finance, science, literature, general)
-   * into 3 structured, fact-grounded pedagogical tiers directly from the source & translated sentences.
-   * 100% dynamic AI & NLP extraction with ZERO hardcoded static analogies or canned metaphors.
+   * Smart Dynamic Text Explanation (Offline / Instant Zero-Lag Fallback)
+   * Dynamically formats source & translated sentences into smooth, intuitive,
+   * plain-language explanation paragraphs without hardcoded analogies or artificial labels.
    *
    * @param {string} sourceText
    * @param {string} translatedText
    * @param {string} lang
-   * @returns {{ concept: string, analogy: string, whyItMatters: string }}
+   * @returns {{ text: string, paragraphs: string[], html: string, concept: string, analogy: string, whyItMatters: string }}
    */
   function smartExplain(sourceText, translatedText, lang = 'bn') {
     const textToCheck = `${translatedText || ''} ${sourceText || ''}`.trim();
     if (!textToCheck) {
+      const defaultText = lang === 'bn'
+        ? 'প্রদত্ত বিষয়টির সহজ ও স্পষ্ট ব্যাখ্যা।'
+        : (lang === 'hi' ? 'दिए गए विषय की सरल और स्पष्ट व्याख्या।' : 'Clear and simple explanation of the provided text.');
       return {
-        concept: lang === 'bn' ? 'প্রদত্ত বিষয়টির মূল বক্তব্য।' : (lang === 'hi' ? 'दिए गए विषय का मुख्य विचार।' : 'Core statement of the provided text.'),
-        analogy: lang === 'bn' ? 'তথ্যটির প্রাসঙ্গিক বিশ্লেষণ।' : (lang === 'hi' ? 'जानकारी का प्रासंगिक विवरण।' : 'Relevant context and breakdown of the text.'),
-        whyItMatters: lang === 'bn' ? 'বিষয়টি সঠিকভাবে বোঝা ও প্রয়োগ করা।' : (lang === 'hi' ? 'बात को सही तरीके से समझना और उपयोग करना।' : 'Understanding and applying the key takeaways.')
+        text: defaultText,
+        paragraphs: [defaultText],
+        html: `<p class="bt-explain-para">${escapeHtml(defaultText)}</p>`,
+        concept: defaultText,
+        analogy: '',
+        whyItMatters: ''
       };
     }
 
@@ -331,55 +336,45 @@ window.SummarizerEngine = (function () {
       .map((s) => s.trim().replace(/^[-*•#\d.]+\s*/, '').trim())
       .filter((s) => s.length > 5 && !isBoilerplateOrNavText(s));
 
-    const isBn = lang === 'bn';
-    const isHi = lang === 'hi';
-
-    let concept = '';
-    let analogy = '';
-    let whyItMatters = '';
+    let explanationParas = [];
 
     if (rawSentences.length === 0) {
       const fallbackClean = processedText.trim().replace(/^[-*•#\d.]+\s*/, '').trim();
-      concept = isBn ? `মূল বক্তব্য: ${fallbackClean}` : (isHi ? `मुख्य बात: ${fallbackClean}` : `Core message: ${fallbackClean}`);
-      analogy = isBn ? 'প্রদত্ত বাক্যের সুস্পষ্ট বিশ্লেষণ ও সারসংক্ষেপ।' : (isHi ? 'दिए गए पाठ का स्पष्ट विश्लेषण व सारांश।' : 'Clear contextual breakdown of the provided text.');
-      whyItMatters = isBn ? 'সঠিক অর্থ অনুধাবন করা ও কার্যকরভাবে কাজে লাগানো।' : (isHi ? 'सही अर्थ को समझना और प्रभावी ढंग से उपयोग करना।' : 'Ensures accurate interpretation and practical application.');
-    } else if (rawSentences.length === 1) {
-      const s0 = rawSentences[0];
-      concept = isBn ? `সহজ কথায়: ${s0}` : (isHi ? `सरल शब्दों में: ${s0}` : `In plain terms: ${s0}`);
-      analogy = isBn ? 'এটি প্রদত্ত তথ্যের প্রধান তাৎপর্য সরাসরি তুলে ধরে।' : (isHi ? 'यह दी गई जानकारी के मुख्य महत्व को स्पष्ट करता है।' : 'Directly highlights the primary takeaway from the statement.');
-      whyItMatters = isBn ? 'তথ্যটির মূল উদ্দেশ্য স্পষ্টভাবে অনুধাবন করে সঠিক সিদ্ধান্ত নেওয়া যায়।' : (isHi ? 'तथ्यों के मूल उद्देश्य को समझकर सही निर्णय लिया जा सकता है।' : 'Provides clear context for sound decision-making and accurate understanding.');
-    } else if (rawSentences.length === 2) {
-      const [s0, s1] = rawSentences;
-      concept = isBn ? `মূল বিষয়: ${s0}` : (isHi ? `मुख्य विषय: ${s0}` : `Core point: ${s0}`);
-      analogy = isBn ? `বিস্তারিত তথ্য: ${s1}` : (isHi ? `विस्तृत विवरण: ${s1}` : `Key details: ${s1}`);
-      whyItMatters = isBn ? 'উভয় বিষয়ের সমন্বয়ে পুরো প্রেক্ষাপটটি স্পষ্টভাবে উপলব্ধি করা যায়।' : (isHi ? 'दोनों बातों के समन्वय से पूरा संदर्भ स्पष्ट रूप से समझा जा सकता है।' : 'Combines these key points for a complete and cohesive understanding.');
+      explanationParas.push(fallbackClean);
+    } else if (rawSentences.length <= 2) {
+      explanationParas.push(rawSentences.join(' '));
     } else {
-      // 3 or more sentences: First sentence is concept, middle sentences are details/context, last sentence is conclusion/outcome
-      const s0 = rawSentences[0];
-      const middle = rawSentences.slice(1, -1).join(' ');
-      const last = rawSentences[rawSentences.length - 1];
-
-      concept = isBn ? `মূল বক্তব্য: ${s0}` : (isHi ? `मुख्य बात: ${s0}` : `Core concept: ${s0}`);
-      analogy = isBn ? `প্রেক্ষাপট ও কার্যপদ্ধতি: ${middle}` : (isHi ? `संदर्भ व प्रक्रिया: ${middle}` : `Context & details: ${middle}`);
-      whyItMatters = isBn ? `মূল ফলাফল বা প্রভাব: ${last}` : (isHi ? `मुख्य परिणाम व प्रभाव: ${last}` : `Key outcome & impact: ${last}`);
+      // 3 or more sentences: organize into 1-2 smooth, well-paced paragraphs
+      const firstPara = rawSentences.slice(0, 2).join(' ');
+      const secondPara = rawSentences.slice(2).join(' ');
+      explanationParas.push(firstPara);
+      if (secondPara) {
+        explanationParas.push(secondPara);
+      }
     }
 
+    const plainText = explanationParas.join('\n\n');
+    const html = explanationParas.map((p) => `<p class="bt-explain-para">${escapeHtml(p)}</p>`).join('');
+
     return {
-      concept,
-      analogy,
-      whyItMatters
+      text: plainText,
+      paragraphs: explanationParas,
+      html,
+      concept: explanationParas[0] || '',
+      analogy: explanationParas[1] || '',
+      whyItMatters: ''
     };
   }
 
   /**
    * Main Explain function:
-   * 1. Uses Chrome Prompt API (window.ai.languageModel) with dynamic LWS pedagogical directives when available.
+   * 1. Uses Chrome Prompt API (window.ai.languageModel) for natural, conversational plain-language explanations.
    * 2. Seamlessly falls back to Smart Dynamic Text Explanation for instant, zero-lag answers.
    *
    * @param {string} sourceText
    * @param {string} translatedText
    * @param {string} targetLang
-   * @returns {Promise<{ sections: { title: string, content: string }[], html: string, plainText: string, engine: string }>}
+   * @returns {Promise<{ html: string, plainText: string, engine: string, text: string }>}
    */
   async function explain(sourceText, translatedText, targetLang = 'bn') {
     const textToProcess = sourceText || translatedText || '';
@@ -392,7 +387,9 @@ window.SummarizerEngine = (function () {
       if (typeof window.ai !== 'undefined' && typeof window.ai.languageModel?.create === 'function') {
         const systemPrompt = window.PromptHarness?.buildSystemPrompt
           ? window.PromptHarness.buildSystemPrompt(targetLang, 'explanation', context)
-          : 'You are an inspiring technical educator explaining concepts with utmost simplicity and real-world analogies.';
+          : (targetLang === 'bn'
+              ? 'আপনি সহজ ও প্রাঞ্জল ভাষায় যেকোনো বিষয় বুঝিয়ে দেন। কোনো অপ্রয়োজনীয় লেবেল ছাড়া সরাসরি সহজ ভাষায় ব্যাখ্যা লিখুন।'
+              : 'Explain the concept simply and intuitively in plain language without rigid category labels.');
 
         const session = await window.ai.languageModel.create({
           systemPrompt: systemPrompt
@@ -400,7 +397,7 @@ window.SummarizerEngine = (function () {
 
         const promptText = window.PromptHarness?.buildUserPrompt
           ? window.PromptHarness.buildUserPrompt(textToProcess, targetLang, context, 'explanation')
-          : `Explain this concept simply with a real-world analogy:\n\n${textToProcess}`;
+          : `Explain this simply:\n\n${textToProcess}`;
 
         const modelOutput = await Promise.race([
           session.prompt(promptText),
@@ -408,9 +405,9 @@ window.SummarizerEngine = (function () {
         ]);
 
         if (modelOutput && modelOutput.trim()) {
-          const parsedSections = parseExplanationOutput(modelOutput, targetLang);
-          if (parsedSections.length >= 2) {
-            return formatExplainResult(parsedSections, 'Chrome AI Explainer', targetLang);
+          const parsed = parseExplanationOutput(modelOutput, targetLang);
+          if (parsed.text) {
+            return formatExplainResult(parsed, 'Chrome AI Explainer', targetLang);
           }
         }
       }
@@ -420,87 +417,62 @@ window.SummarizerEngine = (function () {
 
     // Attempt 2: Smart Dynamic Text Explanation (Guaranteed, Instant, Zero-Lag Fallback)
     const result = smartExplain(sourceText, translatedText, targetLang);
-
-    const isBn = targetLang === 'bn';
-    const isHi = targetLang === 'hi';
-
-    const sections = [
-      {
-        icon: '💡',
-        title: isBn ? 'সহজ ভাষায় মূল ধারণা' : (isHi ? 'सरल भाषा में मूल विचार' : 'Core Concept in Plain Terms'),
-        content: result.concept
-      },
-      {
-        icon: '🔍',
-        title: isBn ? 'বিস্তারিত বিশ্লেষণ ও প্রেক্ষাপট' : (isHi ? 'विस्तृत विश्लेषण व संदर्भ' : 'Context & Key Details'),
-        content: result.analogy
-      },
-      {
-        icon: '⚡',
-        title: isBn ? 'কেন এটি গুরুত্বপূর্ণ' : (isHi ? 'यह क्यों महत्वपूर्ण है' : 'Why It Matters'),
-        content: result.whyItMatters
-      }
-    ];
-
-    return formatExplainResult(sections, 'Smart Explainer', targetLang);
+    return formatExplainResult(result, 'Smart Explainer', targetLang);
   }
 
   /**
-   * Parses freeform model explanation into structured sections.
+   * Parses freeform model explanation into clean, readable paragraphs.
    */
   function parseExplanationOutput(rawOutput, lang = 'bn') {
-    const lines = rawOutput.split('\n').map((l) => l.trim()).filter(Boolean);
-    const sections = [];
-    let currentSec = null;
+    const lines = rawOutput
+      .split('\n')
+      .map((l) => l.trim().replace(/^([💡🔍⚡🎯⚙️📌#*\d.]+\s*|[A-Za-z0-9\u0980-\u09FF\u0900-\u097F\s]{1,25}:\s*)/, '').trim())
+      .filter((l) => l.length > 5 && !isBoilerplateOrNavText(l));
 
-    for (const line of lines) {
-      const match = line.match(/^([💡🔍⚡🎯⚙️📌#*\d.]*\s*)([^:\n]+):\s*(.*)$/);
-      if (match && match[2].length < 35) {
-        if (currentSec) sections.push(currentSec);
-        currentSec = {
-          icon: match[1].trim() || '💡',
-          title: match[2].replace(/^[*#\d.]+\s*/, '').trim(),
-          content: match[3].trim()
-        };
-      } else if (currentSec) {
-        currentSec.content += ' ' + line;
-      } else {
-        currentSec = {
-          icon: '💡',
-          title: lang === 'bn' ? 'সহজ ব্যাখ্যা' : 'Explanation',
-          content: line
-        };
-      }
+    if (lines.length === 0) {
+      const clean = rawOutput.trim();
+      return {
+        text: clean,
+        paragraphs: [clean]
+      };
     }
-    if (currentSec) sections.push(currentSec);
-    return sections;
+
+    return {
+      text: lines.join('\n\n'),
+      paragraphs: lines
+    };
   }
 
   /**
-   * Formats explanation sections into clean, modern card HTML and plain text.
+   * Formats explanation into clean, modern card HTML and plain text.
    */
-  function formatExplainResult(sections, engine, targetLang = 'bn') {
+  function formatExplainResult(explainData, engine, targetLang = 'bn') {
     const i18n = window.PromptHarness?.getI18nLabels
       ? window.PromptHarness.getI18nLabels(targetLang)
-      : { explainBadge: targetLang === 'bn' ? '🧠 সহজ ভাষায় বিশ্লেষণ' : '🧠 Intuitive Breakdown' };
-    const badgeLabel = i18n.explainBadge || (targetLang === 'bn' ? '🧠 সহজ ভাষায় বিশ্লেষণ' : '🧠 Intuitive Breakdown');
+      : { explainBadge: targetLang === 'bn' ? '🧠 সহজ ব্যাখ্যা' : (targetLang === 'hi' ? '🧠 सरल व्याख्या' : '🧠 Simple Explanation') };
+    const badgeLabel = i18n.explainBadge || (targetLang === 'bn' ? '🧠 সহজ ব্যাখ্যা' : (targetLang === 'hi' ? '🧠 सरल व्याख्या' : '🧠 Simple Explanation'));
 
-    const sectionsHtml = sections
-      .map((sec) => {
-        const icon = sec.icon || '💡';
-        const title = escapeHtml(sec.title);
-        const content = escapeHtml(sec.content);
-        return `
-          <div class="bt-explain-section">
-            <div class="bt-explain-sec-title">
-              <span class="bt-explain-icon">${icon}</span>
-              <span>${title}</span>
-            </div>
-            <div class="bt-explain-sec-content">${content}</div>
-          </div>
-        `.trim();
-      })
-      .join('');
+    let bodyHtml = '';
+    let plainTextContent = '';
+
+    if (typeof explainData === 'string') {
+      bodyHtml = `<p class="bt-explain-para">${escapeHtml(explainData)}</p>`;
+      plainTextContent = explainData;
+    } else if (Array.isArray(explainData.paragraphs) && explainData.paragraphs.length > 0) {
+      bodyHtml = explainData.paragraphs.map((p) => `<p class="bt-explain-para">${escapeHtml(p)}</p>`).join('');
+      plainTextContent = explainData.paragraphs.join('\n\n');
+    } else if (explainData.html) {
+      bodyHtml = explainData.html;
+      plainTextContent = explainData.text || '';
+    } else if (explainData.text) {
+      bodyHtml = `<p class="bt-explain-para">${escapeHtml(explainData.text)}</p>`;
+      plainTextContent = explainData.text;
+    } else if (Array.isArray(explainData)) {
+      bodyHtml = explainData
+        .map((sec) => `<p class="bt-explain-para">${escapeHtml(sec.content || sec.title || '')}</p>`)
+        .join('');
+      plainTextContent = explainData.map((sec) => sec.content || sec.title || '').join('\n\n');
+    }
 
     const html = `
       <div class="bt-explain-container">
@@ -508,17 +480,17 @@ window.SummarizerEngine = (function () {
           <span class="bt-explain-badge">${badgeLabel}</span>
           <span class="bt-explain-engine">${engine}</span>
         </div>
-        <div class="bt-explain-body">${sectionsHtml}</div>
+        <div class="bt-explain-body">${bodyHtml}</div>
       </div>
     `.trim();
 
-    const plainText = `${badgeLabel}:\n` + sections.map((s) => `${s.icon} ${s.title}: ${s.content}`).join('\n\n');
+    const plainText = `${badgeLabel}:\n${plainTextContent}`;
 
     return {
-      sections,
       html,
       plainText,
-      engine
+      engine,
+      text: plainTextContent
     };
   }
 
